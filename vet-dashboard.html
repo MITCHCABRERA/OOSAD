@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PetHealthConnect — Veterinarian Dashboard</title>
+  <link rel="stylesheet" href="vet.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>🐾 Vet Portal</h2>
+    <button class="nav-link active" data-panel="overview">Overview</button>
+    <button class="nav-link" data-panel="pets">All Pets</button>
+    <button class="nav-link" data-panel="appointments">Appointments</button>
+    <button class="nav-link" data-panel="reports">Reports</button>
+    <button class="nav-link" data-panel="chat">Chat 💬</button> <!-- NEW -->
+    <button class="nav-link" data-panel="settings">Settings</button>
+    <button id="logout-vet" class="btn danger logout-btn">Logout</button>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>Welcome, <span id="vet-name">Veterinarian</span></h1>
+    </header>
+
+    <section id="overview" class="content-panel active">
+      <div class="card">
+        <h2>Dashboard Overview</h2>
+        <p>Here you can view recent activity, upcoming appointments, and monitor patients under your care.</p>
+        <ul id="vet-activity" class="activity-list"></ul>
+      </div>
+    </section>
+
+    <section id="pets" class="content-panel">
+      <div class="card">
+        <h2>All Registered Pets</h2>
+        <div id="vet-pets-list" class="pets-grid"></div>
+      </div>
+    </section>
+
+    <section id="appointments" class="content-panel">
+      <div class="card">
+        <h2>Appointments</h2>
+        <ul id="vet-appointments-list">
+          <li>No scheduled appointments yet.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section id="reports" class="content-panel">
+      <div class="card">
+        <h2>Reports & Analytics</h2>
+        <p>Coming soon: patient statistics, vaccination coverage, and more insights.</p>
+      </div>
+    </section>
+
+    <section id="chat" class="content-panel">
+  <div class="card chat-card">
+    <h2>💬 Chat with Pet Owners</h2>
+    <div class="form-group">
+      <label for="user-select">Select Owner:</label>
+      <select id="user-select"></select>
+    </div>
+
+    <div id="vet-chat-box" class="chat-box">
+      <p>Select an owner to start chatting.</p>
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="vet-message" placeholder="Type a message..." />
+      <button id="vet-send">Send</button>
+    </div>
+  </div>
+</section>
+
+
+    <section id="settings" class="content-panel">
+      <div class="card">
+        <h2>Account Settings</h2>
+        <p>Feature under development.</p>
+      </div>
+    </section>
+  </div>
+
+  <script src="vet-dashboard.js"></script>
+</body>
+</html>

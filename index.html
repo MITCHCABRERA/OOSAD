@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PetHealthConnect — Login</title>
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+<main class="auth-wrapper">
+<div class="auth-card">
+<h1 class="brand">PetHealthConnect</h1>
+
+
+<div id="auth-forms">
+<!-- Login Form -->
+<form id="login-form" class="form">
+<h2>Log in</h2>
+
+
+<label>Email</label>
+<input id="login-email" type="email" required />
+
+
+<label>Password</label>
+<input id="login-password" type="password" required />
+
+
+<label>Role</label>
+<select id="login-role">
+<option value="owner">Pet Owner</option>
+<option value="vet">Veterinarian</option>
+</select>
+
+
+<button type="submit" class="btn">Log in</button>
+</form>
+
+
+<!-- Register Form -->
+<form id="register-form" class="form hidden">
+<h2>Create account</h2>
+
+
+<label>Full name</label>
+<input id="reg-name" type="text" required />
+
+
+<label>Email</label>
+<input id="reg-email" type="email" required />
+
+
+<label>Password</label>
+<input id="reg-password" type="password" required />
+
+
+<label>Role</label>
+<select id="reg-role">
+<option value="owner">Pet Owner</option>
+<option value="vet">Veterinarian</option>
+</select>
+
+
+<button type="submit" class="btn">Register</button>
+</form>
+</div>
+
+
+<div class="auth-toggle">
+<button id="show-login" class="link">Already have an account?</button>
+<button id="show-register" class="link">Create account</button>
+</div>
+
+
+<div class="hint">Use a real email format. This demo stores data locally in your browser.</div>
+</div>
+</main>
+
+
+<script src="main.js"></script>
+</body>
+</html>

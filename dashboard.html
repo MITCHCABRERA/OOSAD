@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PetHealthConnect — Dashboard</title>
+  <link rel="stylesheet" href="user.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <h2>🐾 PetHealth</h2>
+    <button class="nav-link active" data-target="dashboard">Dashboard</button>
+    <button class="nav-link" data-target="pets">My Pets</button>
+    <button class="nav-link" data-target="appointments">Appointments</button>
+    <button class="nav-link" data-target="bookings">Book Appointment</button>
+    <button class="nav-link" data-target="reminders">Reminders</button>
+    <button class="nav-link" data-target="chat">Chat with Vet</button>
+    <button class="nav-link" data-target="settings">Settings</button>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1>Welcome — <span id="owner-name">Owner</span></h1>
+      <button id="logout" class="btn secondary">Logout</button>
+    </header>
+
+    <main class="content">
+             <!-- Dashboard -->
+            <section id="dashboard" class="panel active dashboard-panel">
+            <div class="dashboard-header">
+                <h2>🐾 Welcome back, <span id="owner-name">Owner</span>!</h2>
+                <p>Here’s a quick overview of your pet’s health and upcoming activities.</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Stats cards -->
+                <div class="card stat-card">
+                <h3>Total Pets</h3>
+                <p id="stat-pets">0</p>
+                </div>
+
+                <div class="card stat-card">
+                <h3>Upcoming Appointments</h3>
+                <p id="stat-appointments">0</p>
+                </div>
+
+                <div class="card stat-card">
+                <h3>Reminders</h3>
+                <p id="stat-reminders">0</p>
+                </div>
+            </div>
+
+            <div class="dashboard-sections">
+                <!-- Upcoming appointments preview -->
+                <div class="card dash-card">
+                <h3>📅 Next Appointment</h3>
+                <div id="next-appointment">
+                    <p>No upcoming appointments yet.</p>
+                </div>
+                </div>
+
+                <!-- Pet health highlights -->
+                <div class="card dash-card">
+                <h3>🐶 Pet Health Updates</h3>
+                <ul id="recent-pets">
+                    <li>No pets added yet.</li>
+                </ul>
+                </div>
+
+                <!-- Reminders preview -->
+                <div class="card dash-card">
+                <h3>🔔 Recent Reminders</h3>
+                <ul id="recent-reminders">
+                    <li>No reminders yet.</li>
+                </ul>
+                </div>
+            </div>
+            </section>
+
+
+      <!-- My Pets -->
+      <section id="pets" class="panel">
+        <h2>Your Pets</h2>
+        <div id="pets-list" class="pets-grid"></div>
+        <button id="add-pet-btn" class="btn">Add Pet</button>
+      </section>
+
+      <!-- Appointments -->
+      <section id="appointments" class="panel">
+        <h2>Upcoming Appointments</h2>
+        <ul id="appointments-list">
+          <li>No upcoming appointments.</li>
+        </ul>
+      </section>
+
+      <!-- Book Appointment Panel -->
+      <section id="bookings" class="panel">
+        <div class="card">
+          <h2>Book Appointment</h2>
+          <form id="appointment-form" class="booking-form">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Select Pet</label>
+                <select id="appointment-pet"></select>
+              </div>
+
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="appointment-date" required>
+              </div>
+
+              <div class="form-group">
+                <label>Reason</label>
+                <input type="text" id="appointment-reason" required>
+              </div>
+            </div>
+
+            <button type="submit" class="btn">Book Appointment</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Your Appointments</h2>
+          <ul id="appointments-list">
+            <li>No appointments yet.</li>
+          </ul>
+        </div>
+      </section>
+
+      
+            <!-- Reminders -->
+            <section id="reminders" class="panel">
+            <h2>Reminders</h2>
+            <ul id="reminders-list" class="reminders-list">
+                <li>No reminders yet.</li>
+            </ul>
+            </section>
+
+
+
+         <!-- 💬 Chat with Vet -->
+            <section id="chat" class="panel">
+            <h2>Chat with Vet</h2>
+
+            <div id="chat-box" class="chat-box">
+                <p>No messages yet.</p>
+            </div>
+
+            <div class="chat-input">
+                <input type="text" id="chat-message" placeholder="Type your message..." />
+                <button id="send-message" class="btn primary">Send</button>
+            </div>
+            </section>
+
+      <!-- Settings -->
+      <section id="settings" class="panel">
+        <h2>Settings</h2>
+        <p>Profile and notification settings coming soon!</p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Add/Edit Pet Modal -->
+  <div id="pet-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modal-title">Add Pet</h3>
+      <form id="pet-form">
+        <label>Pet Name</label>
+        <input id="pet-name" required />
+
+        <label>Species / Breed</label>
+        <input id="pet-species" />
+
+        <label>Birthdate</label>
+        <input id="pet-bday" type="date" />
+
+        <label>Weight (kg)</label>
+        <input id="pet-weight" type="number" step="0.1" />
+
+        <label>Vaccination Notes</label>
+        <textarea id="pet-vax"></textarea>
+
+        <label>Pet Photo</label>
+        <input type="file" id="pet-photo" accept="image/*" />
+
+        <div class="modal-actions">
+          <button type="button" id="cancel-pet" class="btn secondary">Cancel</button>
+          <button type="submit" class="btn">Save Pet</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="user-dashboard.js"></script>
+</body>
+</html>
