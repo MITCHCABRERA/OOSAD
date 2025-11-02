@@ -25,57 +25,78 @@
     </header>
 
     <main class="content">
-             <!-- Dashboard -->
-            <section id="dashboard" class="panel active dashboard-panel">
-            <div class="dashboard-header">
-                <h2>🐾 Welcome back, <span id="owner-name">Owner</span>!</h2>
-                <p>Here’s a quick overview of your pet’s health and upcoming activities.</p>
-            </div>
+<!-- Dashboard -->
+<section id="dashboard" class="panel active dashboard-panel">
+  <div class="dashboard-header">
+    <h2>🐾 Welcome back, <span id="owner-name">Owner</span>!</h2>
+    <p>Here’s a quick overview of your pet’s health and upcoming activities.</p>
+  </div>
 
-            <div class="dashboard-grid">
-                <!-- Stats cards -->
-                <div class="card stat-card">
-                <h3>Total Pets</h3>
-                <p id="stat-pets">0</p>
-                </div>
+  <!-- Stats cards -->
+  <div class="dashboard-grid">
+    <div class="card stat-card">
+      <h3>Total Pets</h3>
+      <p class="stat-number" id="stat-pets">0</p>
+    </div>
 
-                <div class="card stat-card">
-                <h3>Upcoming Appointments</h3>
-                <p id="stat-appointments">0</p>
-                </div>
+    <div class="card stat-card">
+      <h3>Upcoming Appointments</h3>
+      <p class="stat-number" id="stat-appointments">0</p>
+    </div>
 
-                <div class="card stat-card">
-                <h3>Reminders</h3>
-                <p id="stat-reminders">0</p>
-                </div>
-            </div>
+    <div class="card stat-card">
+      <h3>Reminders</h3>
+      <p class="stat-number" id="stat-reminders">0</p>
+    </div>
+  </div>
 
-            <div class="dashboard-sections">
-                <!-- Upcoming appointments preview -->
-                <div class="card dash-card">
-                <h3>📅 Next Appointment</h3>
-                <div id="next-appointment">
-                    <p>No upcoming appointments yet.</p>
-                </div>
-                </div>
+  <!-- Overview sections -->
+  <div class="dashboard-sections">
+    <div class="card dash-card">
+      <h3>📅 Next Appointment</h3>
+      <div id="next-appointment">
+        <p>No upcoming appointments yet.</p>
+      </div>
+    </div>
 
-                <!-- Pet health highlights -->
-                <div class="card dash-card">
-                <h3>🐶 Pet Health Updates</h3>
-                <ul id="recent-pets">
-                    <li>No pets added yet.</li>
-                </ul>
-                </div>
+    <div class="card dash-card">
+      <h3>🐶 Pet Health Updates</h3>
+      <ul id="recent-pets">
+        <li>No pets added yet.</li>
+      </ul>
+    </div>
 
-                <!-- Reminders preview -->
-                <div class="card dash-card">
-                <h3>🔔 Recent Reminders</h3>
-                <ul id="recent-reminders">
-                    <li>No reminders yet.</li>
-                </ul>
-                </div>
-            </div>
-            </section>
+    <div class="card dash-card">
+      <h3>🔔 Recent Reminders</h3>
+      <ul id="recent-reminders">
+        <li>No reminders yet.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Calendar Section -->
+  <div class="calendar-section card">
+    <h3>📆 Appointment Calendar</h3>
+
+    <div class="calendar-controls">
+      <select id="calendar-month"></select>
+      <select id="calendar-year"></select>
+    </div>
+
+    <div id="calendar-grid" class="calendar-grid"></div>
+  </div>
+
+  <!-- Appointment Popup -->
+  <div id="calendar-popup" class="calendar-popup hidden">
+    <div class="popup-content">
+      <h4>Events on <span id="popup-date"></span></h4>
+      <ul id="popup-list"></ul>
+      <button id="close-calendar-popup">Close</button>
+    </div>
+  </div>
+</section>
+
+
 
 
       <!-- My Pets -->
@@ -84,48 +105,78 @@
         <div id="pets-list" class="pets-grid"></div>
         <button id="add-pet-btn" class="btn">Add Pet</button>
       </section>
+      
+    <!-- Appointments -->
+    <section id="appointments" class="panel">
+  <div class="appointments-title"> Upcoming Appointments</div>
 
-      <!-- Appointments -->
-      <section id="appointments" class="panel">
-        <h2>Upcoming Appointments</h2>
-        <ul id="appointments-list">
-          <li>No upcoming appointments.</li>
-        </ul>
-      </section>
+  <div class="appointment-card">
+    <h4>🐶 Pet Name</h4>
+    <p class="date">📆 2025-10-31</p>
+    <p class="reason">Reason: not eating</p>
+    <p>Status: <span class="status confirmed">Confirmed</span></p>
+  </div>
 
-      <!-- Book Appointment Panel -->
-      <section id="bookings" class="panel">
-        <div class="card">
-          <h2>Book Appointment</h2>
-          <form id="appointment-form" class="booking-form">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Select Pet</label>
-                <select id="appointment-pet"></select>
-              </div>
+  <div class="appointment-card">
+    <h4>🐕 pet</h4>
+    <p class="date">📆 2025-11-03</p>
+    <p class="reason">Reason: vomiting</p>
+    <p>Status: <span class="status pending">Pending</span></p>
+  </div>
+</section>
 
-              <div class="form-group">
-                <label>Date</label>
-                <input type="date" id="appointment-date" required>
-              </div>
 
-              <div class="form-group">
-                <label>Reason</label>
-                <input type="text" id="appointment-reason" required>
-              </div>
-            </div>
 
-            <button type="submit" class="btn">Book Appointment</button>
-          </form>
+
+     <!-- Book Appointment Panel -->
+<section id="bookings" class="panel">
+  <div class="book-appointment-section">
+
+    <!-- Appointment Booking Card -->
+    <div class="book-appointment-card">
+      <h3>Book a New Appointment</h3>
+      <form id="appointment-form" class="appointment-form">
+        <div class="form-group">
+          <label for="appointment-pet">Select Pet</label>
+          <select id="appointment-pet" required>
+            <option value="" disabled selected>Choose your pet</option>
+          </select>
         </div>
 
-        <div class="card">
-          <h2>Your Appointments</h2>
-          <ul id="appointments-list">
-            <li>No appointments yet.</li>
-          </ul>
+        <div class="form-group">
+          <label for="appointment-date">Date</label>
+          <input type="date" id="appointment-date" required>
         </div>
-      </section>
+
+        <div class="form-group">
+          <label for="appointment-reason">Reason</label>
+          <input type="text" id="appointment-reason" placeholder="e.g. Vaccination, Check-up" required>
+        </div>
+
+        <button type="submit">Book Appointment</button>
+      </form>
+    </div>
+
+    <!-- Appointment List -->
+    <div class="appointment-list">
+      <h3>Your Appointments</h3>
+      <div class="filter-controls">
+        <label for="filter-status">Filter:</label>
+        <select id="filter-status">
+          <option value="all">All</option>
+          <option value="upcoming">Upcoming</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </div>
+
+      <div id="appointments-list" class="appointment-items">
+        <p class="no-appointments">No appointments yet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 
       
             <!-- Reminders -->

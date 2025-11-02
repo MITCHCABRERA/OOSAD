@@ -13,7 +13,7 @@
     <button class="nav-link" data-panel="pets">All Pets</button>
     <button class="nav-link" data-panel="appointments">Appointments</button>
     <button class="nav-link" data-panel="reports">Reports</button>
-    <button class="nav-link" data-panel="chat">Chat 💬</button> <!-- NEW -->
+    <button class="nav-link" data-panel="chat">Chat 💬</button>
     <button class="nav-link" data-panel="settings">Settings</button>
     <button id="logout-vet" class="btn danger logout-btn">Logout</button>
   </aside>
@@ -23,14 +23,45 @@
       <h1>Welcome, <span id="vet-name">Veterinarian</span></h1>
     </header>
 
+    <!-- 🧭 Overview Section -->
     <section id="overview" class="content-panel active">
+      <div class="dashboard-stats">
+        <div class="stat-card">
+          <h3>🐶 Total Pets</h3>
+          <p id="total-pets">1</p>
+        </div>
+        <div class="stat-card">
+          <h3>📅 Appointments</h3>
+          <p id="total-appointments">1</p>
+        </div>
+        <div class="stat-card">
+          <h3>🔔 Reminders</h3>
+          <p id="total-reminders">3</p>
+        </div>
+        <div class="stat-card">
+          <h3>💬 Messages</h3>
+          <p id="total-messages">7</p>
+        </div>
+      </div>
+
       <div class="card">
         <h2>Dashboard Overview</h2>
-        <p>Here you can view recent activity, upcoming appointments, and monitor patients under your care.</p>
+        <p>Track your upcoming appointments, reminders, and recent chats with pet owners.</p>
         <ul id="vet-activity" class="activity-list"></ul>
+      </div>
+
+      <div class="card">
+        <h2>📅 Appointment Calendar</h2>
+        <div id="calendar-container">
+          <iframe 
+            src="https://calendar.google.com/calendar/embed?src=en.philippines%23holiday%40group.v.calendar.google.com&ctz=Asia%2FManila" 
+            style="border:0" width="100%" height="400" frameborder="0" scrolling="no">
+          </iframe>
+        </div>
       </div>
     </section>
 
+    <!-- 🐕 All Pets -->
     <section id="pets" class="content-panel">
       <div class="card">
         <h2>All Registered Pets</h2>
@@ -38,42 +69,73 @@
       </div>
     </section>
 
-    <section id="appointments" class="content-panel">
-      <div class="card">
-        <h2>Appointments</h2>
-        <ul id="vet-appointments-list">
-          <li>No scheduled appointments yet.</li>
-        </ul>
-      </div>
-    </section>
-
-    <section id="reports" class="content-panel">
-      <div class="card">
-        <h2>Reports & Analytics</h2>
-        <p>Coming soon: patient statistics, vaccination coverage, and more insights.</p>
-      </div>
-    </section>
-
-    <section id="chat" class="content-panel">
-  <div class="card chat-card">
-    <h2>💬 Chat with Pet Owners</h2>
-    <div class="form-group">
-      <label for="user-select">Select Owner:</label>
-      <select id="user-select"></select>
-    </div>
-
-    <div id="vet-chat-box" class="chat-box">
-      <p>Select an owner to start chatting.</p>
-    </div>
-
-    <div class="chat-input">
-      <input type="text" id="vet-message" placeholder="Type a message..." />
-      <button id="vet-send">Send</button>
+    <!-- 📅 Appointments -->
+<section id="appointments" class="content-panel">
+  <div class="card">
+    <h2>Upcoming Appointments</h2>
+    <div id="appointments-container" class="appointments-grid">
+      <!-- JS will populate appointments here dynamically -->
     </div>
   </div>
 </section>
 
 
+    <!-- 📊 Reports -->
+<section id="reports" class="content-panel">
+  <div class="card">
+    <h2>Reports & Analytics</h2>
+
+    <div class="reports-grid">
+      <div class="report-card">
+        <h3>Total Pets</h3>
+        <p id="report-total-pets">0</p>
+      </div>
+      <div class="report-card">
+        <h3>Total Appointments</h3>
+        <p id="report-total-appointments">0</p>
+      </div>
+      <div class="report-card">
+        <h3>Pending Appointments</h3>
+        <p id="report-pending-appointments">0</p>
+      </div>
+      <div class="report-card">
+        <h3>Vaccinations Done</h3>
+        <p id="report-vaccinations">0</p>
+      </div>
+    </div>
+
+    <div class="chart-container">
+      <h3>Appointments Overview</h3>
+      <canvas id="appointments-chart" width="400" height="200"></canvas>
+    </div>
+  </div>
+</section>
+
+
+    <!-- 💬 Chat -->
+    <section id="chat" class="content-panel">
+      <div class="card chat-card">
+        <h2>💬 Chat with Pet Owners</h2>
+
+        <div class="form-group">
+          <label for="user-select">Select Owner:</label>
+          <select id="user-select"></select>
+        </div>
+
+        <div class="chat-container">
+          <div id="vet-chat-box" class="chat-messages">
+            <p>Select an owner to start chatting.</p>
+          </div>
+
+          <div class="chat-input">
+            <input type="text" id="vet-message" placeholder="Type a message..." />
+            <button id="vet-send">Send</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ⚙️ Settings -->
     <section id="settings" class="content-panel">
       <div class="card">
         <h2>Account Settings</h2>

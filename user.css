@@ -428,76 +428,506 @@ body {
 }
 
 /* ===== Dashboard Layout ===== */
-.dashboard-header {
-  margin-bottom: 1.5rem;
-  text-align: left;
-}
-
-.dashboard-header h2 {
-  font-size: 1.8rem;
-  color: #333;
-}
-
+/* === Dashboard Panel Styling === */
 .dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
   margin-bottom: 2rem;
 }
 
 .stat-card {
-  background: #fff;
-  padding: 1.2rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  flex: 1;
+  min-width: 220px;
+  background: white;
+  padding: 1.2rem 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
   text-align: center;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-card:hover {
-  transform: scale(1.05);
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
 }
 
 .stat-card h3 {
-  color: #666;
   font-size: 1rem;
+  color: #444;
   margin-bottom: 0.5rem;
 }
 
 .stat-card p {
-  font-size: 1.6rem;
-  color: #0077cc;
-  font-weight: bold;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2b7a78;
+  margin: 0;
 }
 
+/* === Dashboard Sections (Appointments, Pets, Reminders) === */
+/* ===== Enhanced Dashboard Design ===== */
+.dashboard-panel {
+  background: linear-gradient(180deg, #f9fafb 0%, #eef2ff 100%);
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+/* Dashboard Header */
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h2 {
+  font-size: 1.8rem;
+  color: #1e3a8a;
+  font-weight: 700;
+}
+
+.dashboard-header p {
+  font-size: 1rem;
+  color: #475569;
+  margin-top: 0.3rem;
+}
+
+/* Stat Cards */
+.dashboard-grid {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  flex: 1 1 220px;
+  max-width: 320px;
+  text-align: center;
+  border-top: 5px solid #2563eb;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.05);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.15);
+}
+
+.stat-card h3 {
+  font-size: 1rem;
+  color: #334155;
+}
+
+.stat-card .stat-number {
+  font-size: 2.2rem;
+  color: #1e40af;
+  font-weight: 700;
+  margin-top: 0.4rem;
+}
+
+/* Dashboard Sections (3 cards below) */
 .dashboard-sections {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.8rem;
+  margin-top: 2rem;
 }
 
 .dash-card {
-  background: #fff;
-  padding: 1rem 1.2rem;
-  border-radius: 10px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  background: white;
+  border-radius: 16px;
+  padding: 1.8rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+  border-top: 5px solid #1e40af;
+  transition: 0.3s;
+}
+
+.dash-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
 }
 
 .dash-card h3 {
-  margin-bottom: 0.8rem;
-  font-size: 1.2rem;
-  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .dash-card ul {
   list-style: none;
-  padding: 0;
-  margin: 0;
+  margin-top: 0.5rem;
 }
 
-.dash-card ul li {
-  margin-bottom: 0.5rem;
-  color: #555;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.3rem;
+.dash-card li {
+  background: #f8fafc;
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  margin-bottom: 0.4rem;
+  color: #334155;
+  transition: background 0.2s ease;
+}
+
+.dash-card li:hover {
+  background: #e0e7ff;
+}
+
+/* Calendar Section */
+.calendar-section {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-top: 2rem;
+}
+
+.calendar-section h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+}
+
+.calendar-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.calendar-controls select {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  color: #1e293b;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.calendar-controls select:hover {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.6rem;
+}
+
+.day {
+  background: #f1f5f9;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.day:hover {
+  background: #dbeafe;
+}
+
+.day.marked {
+  background: #93c5fd;
+  color: white;
+  font-weight: 700;
+  border: 2px solid #2563eb;
+}
+
+.calendar-popup .popup-content {
+  border-top: 5px solid #2563eb;
+}
+
+
+/* ===== Appointment Page Styling ===== */
+.appointment-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 6px solid #2563eb;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.appointment-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.appointment-card h4 {
+  color: #1e293b;
+  font-size: 1.1rem;
+  margin-bottom: 0.3rem;
+}
+
+.appointment-card p {
+  margin: 0.3rem 0;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.appointment-card .date {
+  color: #2563eb;
+  font-weight: 600;
+}
+
+.appointment-card .reason {
+  font-style: italic;
+  color: #475569;
+}
+
+.appointment-card .status {
+  font-weight: bold;
+}
+
+.status.confirmed {
+  color: #16a34a;
+}
+
+.status.pending {
+  color: #f59e0b;
+}
+
+.status.cancelled {
+  color: #dc2626;
+}
+
+/* Title Styling */
+.appointments-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.appointments-title::before {
+  content: "📅";
+  font-size: 1.5rem;
+}
+
+/* ===== Book Appointment Section ===== */
+.book-appointment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+}
+
+/* Appointment Form Card */
+.book-appointment-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-top: 4px solid #2563eb;
+}
+
+.book-appointment-card h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 1.5rem;
+}
+
+.appointment-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.2rem;
+}
+
+.appointment-form label {
+  font-weight: 500;
+  color: #334155;
+}
+
+.appointment-form input,
+.appointment-form select {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+}
+
+.appointment-form input:focus,
+.appointment-form select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.appointment-form button {
+  grid-column: 1 / -1;
+  justify-self: start;
+  padding: 0.7rem 1.5rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.appointment-form button:hover {
+  background: #1d4ed8;
+}
+
+/* ===== Appointment List with Timeline Style ===== */
+.appointment-list {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.appointment-list:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+}
+
+.appointment-list h3 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.appointment-list h3::before {
+  content: "📅";
+  font-size: 1.3rem;
+}
+
+/* Filter dropdown */
+.filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.filter-controls label {
+  font-weight: 500;
+  color: #334155;
+}
+
+.filter-controls select {
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  transition: border-color 0.2s ease;
+}
+
+.filter-controls select:focus {
+  border-color: #2563eb;
+}
+
+/* Appointment items grid layout */
+.appointment-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* Individual appointment card */
+.appointment-item {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  border-left: 5px solid #2563eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.appointment-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Icon on top-left */
+.appointment-item::before {
+  content: "🐾";
+  position: absolute;
+  left: 0.8rem;
+  top: 0.8rem;
+  font-size: 1.2rem;
+}
+
+/* Pet name and status row */
+.appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pet-name {
+  font-weight: 600;
+  color: #1e3a8a;
+  font-size: 1rem;
+}
+
+.status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Color-coded statuses */
+.appointment-item.upcoming .status {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.appointment-item.completed .status {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.appointment-item.cancelled .status {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+/* Appointment info */
+.appointment-item p {
+  margin: 0;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.appointment-item .date {
+  font-weight: 500;
+}
+
+.no-appointments {
+  color: #94a3b8;
+  font-style: italic;
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 1rem 0;
 }

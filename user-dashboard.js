@@ -334,21 +334,20 @@ function renderReminders() {
 document.addEventListener("DOMContentLoaded", renderReminders);
 
 
-// ====== DASHBOARD SUMMARY ======
 function renderDashboard() {
-  const pets = JSON.parse(localStorage.getItem("ph_pets") || "[]");
+  const pets = JSON.parse(localStorage.getItem("pets") || "[]");
   const appointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
   const reminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
   const session = JSON.parse(localStorage.getItem("ph_session"));
 
   // Stats
   document.getElementById("stat-pets").textContent = pets.length;
-  document.getElementById("stat-appointments").textContent = appointments.filter(a => a.ownerEmail === session.email).length;
-  document.getElementById("stat-reminders").textContent = reminders.filter(r => r.user === session.email).length;
+  document.getElementById("stat-appointments").textContent = appointments.length;
+  document.getElementById("stat-reminders").textContent =
+    reminders.filter(r => r.user === session.email).length;
 
   // Next Appointment
-  const userAppointments = appointments.filter(a => a.ownerEmail === session.email);
-  const nextApp = userAppointments.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+  const nextApp = appointments.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
   const nextAppBox = document.getElementById("next-appointment");
   nextAppBox.innerHTML = nextApp
     ? `<p><strong>${nextApp.petName}</strong> — ${nextApp.date}<br><em>${nextApp.reason}</em></p>`
@@ -369,3 +368,226 @@ function renderDashboard() {
 }
 
 document.addEventListener("DOMContentLoaded", renderDashboard);
+
+      // Calendar
+function renderCalendarWithDropdown() {
+  const calendarGrid = document.getElementById("calendar-grid");
+  const monthSelect = document.getElementById("calendar-month");
+  const yearSelect = document.getElementById("calendar-year");
+
+  const appointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
+  const reminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
+  const session = JSON.parse(localStorage.getItem("ph_session")) || { email: "" };
+
+  const currentDate = new Date();
+  let currentMonth = currentDate.getMonth();
+  let currentYear = currentDate.getFullYear();
+
+  // --- Populate dropdowns ---
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  monthSelect.innerHTML = months.map((m, i) =>
+    `<option value="${i}" ${i === currentMonth ? "selected" : ""}>${m}</option>`
+  ).join("");
+
+  const startYear = 2020;
+  const endYear = 2030;
+  yearSelect.innerHTML = Array.from({ length: endYear - startYear + 1 }, (_, i) => {
+    const year = startYear + i;
+    return `<option value="${year}" ${year === currentYear ? "selected" : ""}>${year}</option>`;
+  }).join("");
+
+  // --- Function to render calendar ---
+  function renderDays(month, year) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    let daysHTML = "";
+
+    // Fill empty slots before first day
+    for (let i = 0; i < firstDay.getDay(); i++) {
+      daysHTML += `<div class="calendar-day empty"></div>`;
+    }
+
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const hasAppointments = appointments.some(a => a.date === dateStr);
+      const hasReminders = reminders.some(r => r.user === session.email && r.date === dateStr);
+
+      const classes = [
+        "calendar-day",
+        hasAppointments ? "appointment" : "",
+        hasReminders ? "reminder" : ""
+      ].join(" ");
+
+      daysHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
+    }
+
+    calendarGrid.innerHTML = daysHTML;
+
+    // Click event for details
+    document.querySelectorAll(".calendar-day").forEach(dayEl => {
+      dayEl.addEventListener("click", () => {
+        const selectedDate = dayEl.dataset.date;
+        if (!selectedDate) return;
+
+        const dayAppointments = appointments.filter(a => a.date === selectedDate);
+        const dayReminders = reminders.filter(r => r.user === session.email && r.date === selectedDate);
+
+        showCalendarPopup(selectedDate, dayAppointments, dayReminders);
+      });
+    });
+  }
+
+  // Initial render
+  renderDays(currentMonth, currentYear);
+
+  // Re-render when dropdown changes
+  monthSelect.addEventListener("change", () => {
+    currentMonth = parseInt(monthSelect.value);
+    renderDays(currentMonth, currentYear);
+  });
+
+  yearSelect.addEventListener("change", () => {
+    currentYear = parseInt(yearSelect.value);
+    renderDays(currentMonth, currentYear);
+  });
+}
+
+// Popup show/hide
+function showCalendarPopup(date, appointments, reminders) {
+  const popup = document.getElementById("calendar-popup");
+  const popupDate = document.getElementById("popup-date");
+  const popupList = document.getElementById("popup-list");
+
+  popupDate.textContent = date;
+
+  if (!appointments.length && !reminders.length) {
+    popupList.innerHTML = "<li>No events for this date.</li>";
+  } else {
+    popupList.innerHTML = `
+      ${appointments.map(a => `<li><strong>🐾 ${a.petName}</strong> — ${a.reason}</li>`).join("")}
+      ${reminders.map(r => `<li><strong>🔔 Reminder:</strong> ${r.text}</li>`).join("")}
+    `;
+  }
+
+  popup.classList.remove("hidden");
+}
+
+document.getElementById("close-calendar-popup").addEventListener("click", () => {
+  document.getElementById("calendar-popup").classList.add("hidden");
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderDashboard();
+  renderCalendarWithDropdown();
+});
+
+
+function renderCalendarWithDropdown() {
+  const calendarGrid = document.getElementById("calendar-grid");
+  const monthSelect = document.getElementById("calendar-month");
+  const yearSelect = document.getElementById("calendar-year");
+  const appointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
+  const reminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
+  const session = JSON.parse(localStorage.getItem("ph_session"));
+
+  // Fill months
+  const months = [
+    "January","February","March","April","May","June",
+    "July","August","September","October","November","December"
+  ];
+  months.forEach((m, i) => {
+    const opt = document.createElement("option");
+    opt.value = i;
+    opt.textContent = m;
+    monthSelect.appendChild(opt);
+  });
+
+  // Fill years (5 years range)
+  const thisYear = new Date().getFullYear();
+  for (let y = thisYear - 2; y <= thisYear + 2; y++) {
+    const opt = document.createElement("option");
+    opt.value = y;
+    opt.textContent = y;
+    yearSelect.appendChild(opt);
+  }
+
+  // Draw Calendar
+  function renderDays() {
+    calendarGrid.innerHTML = "";
+    const month = +monthSelect.value;
+    const year = +yearSelect.value;
+    const firstDay = new Date(year, month, 1).getDay();
+    const totalDays = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement("div");
+      empty.className = "day empty";
+      calendarGrid.appendChild(empty);
+    }
+
+    for (let day = 1; day <= totalDays; day++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+      const cell = document.createElement("div");
+      cell.className = "day";
+      cell.textContent = day;
+
+      // Highlight booked appointments or reminders
+      const hasApp = appointments.some(a => a.date === dateStr);
+      const hasRem = reminders.some(r => r.date === dateStr && r.user === session.email);
+
+      if (hasApp || hasRem) cell.classList.add("marked");
+
+      cell.addEventListener("click", () => openPopup(dateStr));
+      calendarGrid.appendChild(cell);
+    }
+  }
+
+  // Popup
+  const popup = document.getElementById("calendar-popup");
+  const popupDate = document.getElementById("popup-date");
+  const popupList = document.getElementById("popup-list");
+  const closePopup = document.getElementById("close-calendar-popup");
+
+  function openPopup(dateStr) {
+    popupDate.textContent = dateStr;
+    popupList.innerHTML = "";
+
+    const events = [
+      ...appointments.filter(a => a.date === dateStr),
+      ...reminders.filter(r => r.date === dateStr && r.user === session.email)
+    ];
+
+    if (events.length === 0) {
+      popupList.innerHTML = "<li>No events on this date.</li>";
+    } else {
+      events.forEach(ev => {
+        const li = document.createElement("li");
+        li.textContent = ev.petName
+          ? `${ev.petName} — ${ev.reason || "Check-up"}`
+          : `🔔 ${ev.text}`;
+        popupList.appendChild(li);
+      });
+    }
+
+    popup.classList.remove("hidden");
+  }
+
+  closePopup.addEventListener("click", () => popup.classList.add("hidden"));
+
+  monthSelect.value = new Date().getMonth();
+  yearSelect.value = new Date().getFullYear();
+  renderDays();
+
+  monthSelect.addEventListener("change", renderDays);
+  yearSelect.addEventListener("change", renderDays);
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  renderDashboard();
+  renderCalendarWithDropdown();
+});
