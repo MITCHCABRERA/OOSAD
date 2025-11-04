@@ -151,19 +151,30 @@ body {
 }
 
 /* PETS GRID */
-.pets-grid {
+#vet-pets-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 1.2rem;
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.pet-photo {
+    width: 100%;
+    max-width: 250px; 
+    height: 200px;
+    object-fit: cover; 
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
 }
 
 .pet-card {
-  background: #fafafa;
-  padding: 1rem;
-  border-radius: 10px;
-  border: 1px solid #e0e0e0;
-  text-align: center;
-  transition: 0.3s;
+    border: 1px solid #e0e0e0;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05); 
+    background-color: white;
+    height: 100%; 
+    overflow: hidden; 
 }
 
 .pet-card:hover {

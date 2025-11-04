@@ -43,6 +43,40 @@ if (!petPhotoInput) {
   petForm.insertBefore(petPhotoInput, petForm.querySelector('.modal-actions'));
 }
 
+/**
+ * Reduces the size of a Base64 image string using the Canvas API.
+ * @param {string} base64Image
+ * @returns {Promise<string>}
+ */
+function compressImage(base64Image) {
+  return new Promise((resolve) => {
+    const MAX_WIDTH = 400; // Sets maximum width for thumbnail
+    const image = new Image();
+    image.src = base64Image;
+
+    image.onload = function() {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      // Calculate new dimensions
+      let width = image.width;
+      let height = image.height;
+
+      if (width > MAX_WIDTH) {
+        height *= MAX_WIDTH / width;
+        width = MAX_WIDTH;
+      }
+      
+      canvas.width = width;
+      canvas.height = height;
+
+      ctx.drawImage(image, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+    };
+    image.onerror = () => resolve(base64Image); 
+  });
+}
+
 // ====== Render Pets ======
 function renderPets() {
   petsList.innerHTML = '';
@@ -88,13 +122,15 @@ function renderPets() {
   document.querySelectorAll('.delete-btn').forEach(btn => {
     btn.addEventListener('click', e => {
       const index = e.target.dataset.index;
+      const deletedPet = pets[index];
+
       pets.splice(index, 1);
       localStorage.setItem('pets', JSON.stringify(pets));
 
       // Remove from global vet list as well
       const loggedUser = JSON.parse(localStorage.getItem("ph_session"));
       let allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
-      allPets = allPets.filter(p => !(p.ownerEmail === loggedUser.email && p.name === pets[index]?.name));
+      allPets = allPets.filter(p => !(p.ownerEmail === loggedUser.email && p.name === deletedPet.name));
       localStorage.setItem("ph_all_pets", JSON.stringify(allPets));
 
       renderPets();
@@ -104,11 +140,7 @@ function renderPets() {
 }
 
 // ====== Pet Form Submit ======
-petForm.addEventListener('submit', e => {
-  e.preventDefault();
-  const file = petPhotoInput.files[0];
-
-  const savePet = (photoData) => {
+const savePet = (photoData) => {
     const petData = {
       name: document.getElementById('pet-name').value,
       species: document.getElementById('pet-species').value,
@@ -118,38 +150,95 @@ petForm.addEventListener('submit', e => {
       photo: photoData || (editingIndex !== null ? pets[editingIndex].photo : null)
     };
 
-    if (editingIndex !== null) {
-      pets[editingIndex] = petData; // update
-      editingIndex = null;
-    } else {
-      pets.push(petData); // add
+    const loggedUser = JSON.parse(localStorage.getItem("ph_session"));
+    let allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
+
+        // If the user session is gone, alert and stop.
+    if (!loggedUser) {
+        alert("Session expired. Please log in again to save pets.");
+        petModal.classList.add('hidden');
+        return;
     }
 
-    localStorage.setItem('pets', JSON.stringify(pets));
+    if (editingIndex !== null) {
+      // Logic for EDITING
+      const originalPetName = pets[editingIndex].name;
+      pets[editingIndex] = petData; // update
 
-    // ✅ Save to global vet list
-    const loggedUser = JSON.parse(localStorage.getItem("ph_session"));
-    const allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
-    allPets.push({ ...petData, owner: loggedUser.name, ownerEmail: loggedUser.email });
+      const globalIndex = allPets.findIndex(p => p.ownerEmail === loggedUser.email && p.name === originalPetName);
+      if (globalIndex !== -1) {
+          allPets[globalIndex] = { ...petData, owner: loggedUser.name, ownerEmail: loggedUser.email };
+      }
+
+      editingIndex = null;
+    } else {
+      // Logic for ADDING
+      pets.push(petData);
+      allPets.push({ ...petData, owner: loggedUser.name, ownerEmail: loggedUser.email });
+    }
+
+    try {
+    localStorage.setItem('pets', JSON.stringify(pets));
     localStorage.setItem("ph_all_pets", JSON.stringify(allPets));
 
-    petForm.reset();
-    petModal.classList.add('hidden');
-    renderPets();
-    refreshPetOptions();
-  };
+    // Determine if we added a new pet or edited an existing one
+    const successMessage = editingIndex === null
+      ? `Pet "${petData.name}" successfully added!`
+      : `Pet "${petData.name}" successfully updated!`;
+    
+    alert(successMessage);
+    } catch (e) {
+        if (e.name === 'QuotaExceededError') {
+            // Error for image being too large
+            alert("SAVE FAILED: The photo file is too large. Please try a smaller image to save your pet.");
+        } else {
+            console.error("Unknown error during save:", e);
+            alert("An unknown error occurred while saving the pet.");
+        }
+        return; 
+    }
+
+    document.getElementById('pet-photo').value = '';
+
+      petForm.reset();
+      petModal.classList.add('hidden');
+      renderPets();
+      refreshPetOptions();
+    };
+
+
+// 2. PET FORM EVENT LISTENER (Handles photo loading and calls savePet)
+petForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const fileInput = document.getElementById('pet-photo');
+  const file = fileInput.files[0];
 
   if (file) {
     const reader = new FileReader();
-    reader.onload = function() {
-      savePet(reader.result);
+
+    reader.onload = async function() {
+      try {
+        const compressedPhotoData = await compressImage(reader.result);
+        savePet(compressedPhotoData);
+      } catch (e) {
+        console.error("Compression error:", e);
+        alert("Error compressing photo. Saving pet without new image.");
+        savePet(null);
+      }
     };
+
+    reader.onerror = function(error) {
+      console.error("FileReader error:", error);
+      alert("Error reading photo file. Saving pet without new image.");
+      savePet(null); 
+    };
+    
     reader.readAsDataURL(file);
+
   } else {
-    savePet(null);
+    savePet(null); 
   }
 });
-
 // ====== Refresh pet dropdown for appointments ======
 function refreshPetOptions() {
   const appointmentPetSelect = document.getElementById("appointment-pet");
