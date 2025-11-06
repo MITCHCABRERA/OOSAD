@@ -1,682 +1,602 @@
-// ====== Navigation between panels ======
-const navLinks = document.querySelectorAll('.nav-link');
-const panels = document.querySelectorAll('.panel');
-
-navLinks.forEach(link => {
-  link.addEventListener('click', () => {
-    navLinks.forEach(btn => btn.classList.remove('active'));
-    link.classList.add('active');
-
-    const target = link.dataset.target;
-    panels.forEach(panel => {
-      panel.classList.toggle('active', panel.id === target);
-    });
-  });
-});
-
-// ====== Add Pet Modal ======
-const addPetBtn = document.getElementById('add-pet-btn');
-const petModal = document.getElementById('pet-modal');
-const cancelPet = document.getElementById('cancel-pet');
-const petForm = document.getElementById('pet-form');
-const petsList = document.getElementById('pets-list');
-
-let pets = JSON.parse(localStorage.getItem('pets')) || [];
-let editingIndex = null;
-
-addPetBtn.addEventListener('click', () => {
-  editingIndex = null;
-  petForm.reset();
-  document.getElementById('modal-title').textContent = 'Add Pet';
-  petModal.classList.remove('hidden');
-});
-cancelPet.addEventListener('click', () => petModal.classList.add('hidden'));
-
-// Add photo input dynamically if not in HTML
-let petPhotoInput = document.getElementById('pet-photo');
-if (!petPhotoInput) {
-  petPhotoInput = document.createElement('input');
-  petPhotoInput.type = 'file';
-  petPhotoInput.accept = 'image/*';
-  petPhotoInput.id = 'pet-photo';
-  petPhotoInput.style.marginBottom = '0.5rem';
-  petForm.insertBefore(petPhotoInput, petForm.querySelector('.modal-actions'));
+// Functional/Procedural part
+function loadUsers() { return JSON.parse(localStorage.getItem('ph_users') || '[]'); }
+function loadPets() { return JSON.parse(localStorage.getItem('pets')) || []; }
+function savePets(pets) { localStorage.setItem('pets', JSON.stringify(pets)); }
+function loadAppointments() {
+    const session = JSON.parse(localStorage.getItem("ph_session"));
+    const allApps = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
+    return allApps.filter(a => a.ownerEmail === session.email);
 }
+function saveAppointments(apps) {
+    const session = JSON.parse(localStorage.getItem("ph_session"));
+    let allApps = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
+    allApps = allApps.filter(a => a.ownerEmail !== session.email);
+    localStorage.setItem("ph_appointments", JSON.stringify([...allApps, ...apps]));
+}
+function loadChats() { return JSON.parse(localStorage.getItem("ph_chats") || "[]"); }
+function saveChats(chats) { localStorage.setItem("ph_chats", JSON.stringify(chats)); }
+function loadReminders() { return JSON.parse(localStorage.getItem("ph_reminders") || "[]"); }
+function saveReminders(reminders) { localStorage.setItem("ph_reminders", JSON.stringify(reminders)); }
 
 /**
- * Reduces the size of a Base64 image string using the Canvas API.
+ * Reduces the size of a Base64 image string.
  * @param {string} base64Image
  * @returns {Promise<string>}
  */
 function compressImage(base64Image) {
-  return new Promise((resolve) => {
-    const MAX_WIDTH = 400; // Sets maximum width for thumbnail
-    const image = new Image();
-    image.src = base64Image;
+    return new Promise((resolve) => {
+        const MAX_WIDTH = 400;
+        const image = new Image();
+        image.src = base64Image;
 
-    image.onload = function() {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // Calculate new dimensions
-      let width = image.width;
-      let height = image.height;
+        image.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            let width = image.width;
+            let height = image.height;
 
-      if (width > MAX_WIDTH) {
-        height *= MAX_WIDTH / width;
-        width = MAX_WIDTH;
-      }
-      
-      canvas.width = width;
-      canvas.height = height;
+            if (width > MAX_WIDTH) {
+                height *= MAX_WIDTH / width;
+                width = MAX_WIDTH;
+            }
 
-      ctx.drawImage(image, 0, 0, width, height);
-      resolve(canvas.toDataURL('image/jpeg', 0.7)); 
-    };
-    image.onerror = () => resolve(base64Image); 
-  });
+            canvas.width = width;
+            canvas.height = height;
+
+            ctx.drawImage(image, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        image.onerror = () => resolve(base64Image);
+    });
 }
 
-// ====== Render Pets ======
-function renderPets() {
-  petsList.innerHTML = '';
-  if (pets.length === 0) {
-    petsList.innerHTML = '<p>No pets added yet.</p>';
-    return;
-  }
-
-  pets.forEach((pet, index) => {
-    const div = document.createElement('div');
-    div.className = 'pet-card';
-    div.innerHTML = `
-      ${pet.photo ? `<img src="${pet.photo}" alt="${pet.name}" class="pet-photo">` : ''}
-      <h4>${pet.name}</h4>
-      <p>${pet.species || '—'}</p>
-      <p>Weight: ${pet.weight || '—'} kg</p>
-      <p>Birthday: ${pet.bday || '—'}</p>
-      <p>${pet.vax || ''}</p>
-      <button class="btn secondary edit-btn" data-index="${index}">Edit</button>
-      <button class="btn secondary delete-btn" data-index="${index}">Delete</button>
-    `;
-    petsList.appendChild(div);
-  });
-
-  // Edit button
-  document.querySelectorAll('.edit-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const index = e.target.dataset.index;
-      const pet = pets[index];
-      editingIndex = index;
-
-      document.getElementById('pet-name').value = pet.name;
-      document.getElementById('pet-species').value = pet.species || '';
-      document.getElementById('pet-bday').value = pet.bday || '';
-      document.getElementById('pet-weight').value = pet.weight || '';
-      document.getElementById('pet-vax').value = pet.vax || '';
-      document.getElementById('modal-title').textContent = 'Edit Pet';
-      petModal.classList.remove('hidden');
-    });
-  });
-
-  // Delete button
-  document.querySelectorAll('.delete-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const index = e.target.dataset.index;
-      const deletedPet = pets[index];
-
-      pets.splice(index, 1);
-      localStorage.setItem('pets', JSON.stringify(pets));
-
-      // Remove from global vet list as well
-      const loggedUser = JSON.parse(localStorage.getItem("ph_session"));
-      let allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
-      allPets = allPets.filter(p => !(p.ownerEmail === loggedUser.email && p.name === deletedPet.name));
-      localStorage.setItem("ph_all_pets", JSON.stringify(allPets));
-
-      renderPets();
-      refreshPetOptions();
-    });
-  });
-}
-
-// ====== Pet Form Submit ======
-const savePet = (photoData) => {
-    const petData = {
-      name: document.getElementById('pet-name').value,
-      species: document.getElementById('pet-species').value,
-      bday: document.getElementById('pet-bday').value,
-      weight: document.getElementById('pet-weight').value,
-      vax: document.getElementById('pet-vax').value,
-      photo: photoData || (editingIndex !== null ? pets[editingIndex].photo : null)
-    };
-
-    const loggedUser = JSON.parse(localStorage.getItem("ph_session"));
-    let allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
-
-        // If the user session is gone, alert and stop.
-    if (!loggedUser) {
-        alert("Session expired. Please log in again to save pets.");
-        petModal.classList.add('hidden');
-        return;
-    }
-
-    if (editingIndex !== null) {
-      // Logic for EDITING
-      const originalPetName = pets[editingIndex].name;
-      pets[editingIndex] = petData; // update
-
-      const globalIndex = allPets.findIndex(p => p.ownerEmail === loggedUser.email && p.name === originalPetName);
-      if (globalIndex !== -1) {
-          allPets[globalIndex] = { ...petData, owner: loggedUser.name, ownerEmail: loggedUser.email };
-      }
-
-      editingIndex = null;
-    } else {
-      // Logic for ADDING
-      pets.push(petData);
-      allPets.push({ ...petData, owner: loggedUser.name, ownerEmail: loggedUser.email });
-    }
-
-    try {
-    localStorage.setItem('pets', JSON.stringify(pets));
-    localStorage.setItem("ph_all_pets", JSON.stringify(allPets));
-
-    // Determine if we added a new pet or edited an existing one
-    const successMessage = editingIndex === null
-      ? `Pet "${petData.name}" successfully added!`
-      : `Pet "${petData.name}" successfully updated!`;
-    
-    alert(successMessage);
-    } catch (e) {
-        if (e.name === 'QuotaExceededError') {
-            // Error for image being too large
-            alert("SAVE FAILED: The photo file is too large. Please try a smaller image to save your pet.");
-        } else {
-            console.error("Unknown error during save:", e);
-            alert("An unknown error occurred while saving the pet.");
+// DASHBOARD CLASS
+class PetOwnerDashboard {
+    constructor() {
+        // State/Session Management
+        this.session = JSON.parse(localStorage.getItem("ph_session"));
+        if (!this.session || this.session.role !== "owner") {
+            window.location.href = "index.html";
+            return;
         }
-        return; 
+
+        this.pets = loadPets().filter(p => p.ownerEmail === this.session.email);
+        this.editingIndex = null;
+
+        // DOM Element
+        this.navLinks = document.querySelectorAll('.nav-link');
+        this.panels = document.querySelectorAll('.content-panel');
+        this.logoutBtn = document.getElementById("logout");
+        this.petsList = document.getElementById('pets-list');
+        this.petForm = document.getElementById('pet-form');
+        this.petModal = document.getElementById('pet-modal');
+        this.cancelPet = document.getElementById('cancel-pet');
+        this.addPetBtn = document.getElementById('add-pet-btn');
+        this.appointmentForm = document.getElementById('appointment-form');
+        this.appointmentsList = document.getElementById("appointments-list");
+        this.reminderForm = document.getElementById("reminder-form");
+        this.remindersList = document.getElementById("reminders-list");
+        this.chatBox = document.getElementById("chat-box");
+        this.chatMessageInput = document.getElementById("chat-message");
+        this.sendMessageBtn = document.getElementById("send-message");
+        this.monthSelect = document.getElementById("calendar-month");
+        this.yearSelect = document.getElementById("calendar-year");
+        this.calendarGrid = document.getElementById("calendar-days");
+        this.popup = document.getElementById("calendar-popup");
+        this.closePopup = document.getElementById("close-calendar-popup");
+
+        this.setOwnerName();
+        this.ensurePetPhotoInput();
     }
 
-    document.getElementById('pet-photo').value = '';
+    setOwnerName() {
+        const nameSpans = document.querySelectorAll("#owner-name, #owner-name-2");
+        nameSpans.forEach(span => {
+            span.textContent = this.session.name;
+        });
+    }
 
-      petForm.reset();
-      petModal.classList.add('hidden');
-      renderPets();
-      refreshPetOptions();
-    };
+    ensurePetPhotoInput() {
+        let petPhotoInput = document.getElementById('pet-photo');
+        if (!petPhotoInput) {
+            petPhotoInput = document.createElement('input');
+            petPhotoInput.type = 'file';
+            petPhotoInput.accept = 'image/*';
+            petPhotoInput.id = 'pet-photo';
+            petPhotoInput.style.marginBottom = '0.5rem';
+            this.petForm.insertBefore(petPhotoInput, this.petForm.querySelector('.modal-actions'));
+        }
+    }
+
+    // INITIALIZATION AND NAVIGATION
+    init() {
+        this.setupNavigation();
+        this.setupPetManagement();
+        this.setupAppointmentManagement();
+        this.setupReminderManagement();
+        this.setupChat();
+        this.setupCalendar();
+
+        this.renderPets();
+        this.refreshAppointments();
+        this.renderReminders();
+    }
+
+    setupNavigation() {
+        this.navLinks.forEach(link => {
+            link.addEventListener('click', this.handleNavigation.bind(this));
+        });
+        if (this.logoutBtn) {
+            this.logoutBtn.addEventListener("click", this.handleLogout.bind(this));
+        }
+    }
+
+    handleNavigation(e) {
+        const link = e.currentTarget;
+        this.navLinks.forEach(btn => btn.classList.remove('active'));
+        link.classList.add('active');
+
+        // Use data-panel and .content-panel
+        const target = link.dataset.panel;
+        this.panels.forEach(panel => {
+            panel.classList.toggle('active', panel.id === target);
+        });
+        // Rerender chat/calendar when opened to ensure fresh data/scroll
+        if (target === 'chat') this.renderChat();
+        if (target === 'reminders') this.renderReminders();
+    }
+
+    handleLogout() {
+        localStorage.removeItem("ph_session");
+        window.location.href = "index.html";
+    }
+
+    // PET MANAGEMENT METHODS
+    setupPetManagement() {
+        this.addPetBtn.addEventListener('click', this.openAddPetModal.bind(this));
+        this.cancelPet.addEventListener('click', this.closePetModal.bind(this));
+        this.petForm.addEventListener('submit', this.handlePetFormSubmit.bind(this));
+    }
+
+    openAddPetModal() {
+        this.editingIndex = null;
+        this.petForm.reset();
+        document.getElementById('modal-title').textContent = 'Add Pet';
+        this.petModal.classList.remove('hidden');
+    }
+
+    closePetModal() {
+        this.petModal.classList.add('hidden');
+    }
+
+    renderPets() {
+        this.pets = loadPets().filter(p => p.ownerEmail === this.session.email);
+        this.petsList.innerHTML = '';
+        if (this.pets.length === 0) {
+            this.petsList.innerHTML = '<p>No pets added yet.</p>';
+            document.getElementById('stat-pets').textContent = '0';
+            return;
+        }
+
+        this.pets.forEach((pet, index) => {
+            const div = document.createElement('div');
+            div.className = 'pet-card';
+            div.innerHTML = `
+                <div class="pet-image-container">
+                    ${pet.photo ? `<img src="${pet.photo}" alt="${pet.name}" class="pet-image">` : '🐾'}
+                </div>
+                <div class="pet-details">
+                    <h3>${pet.name}</h3>
+                    <p>Species: ${pet.species || '—'}</p>
+                    <p>Weight: ${pet.weight || '—'} kg</p>
+                    <p>Birthday: ${pet.bday || '—'}</p>
+                </div>
+                <div class="pet-card-actions">
+                    <button class="btn secondary edit-btn" data-index="${index}">Edit</button>
+                    <button class="btn danger delete-btn" data-index="${index}">Delete</button>
+                </div>
+            `;
+            this.petsList.appendChild(div);
+        });
+
+        document.getElementById('stat-pets').textContent = this.pets.length;
+
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', this.openEditPetModal.bind(this)));
+        document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', this.handleDeletePet.bind(this)));
+
+        this.refreshPetOptions();
+    }
+
+    openEditPetModal(e) {
+        const index = e.currentTarget.dataset.index;
+        const pet = this.pets[index];
+        this.editingIndex = index;
+
+        document.getElementById('pet-name').value = pet.name;
+        document.getElementById('pet-species').value = pet.species || '';
+        document.getElementById('pet-bday').value = pet.bday || '';
+        document.getElementById('pet-weight').value = pet.weight || '';
+        document.getElementById('pet-vax').value = pet.vax || '';
+        document.getElementById('modal-title').textContent = 'Edit Pet';
+        this.petModal.classList.remove('hidden');
+    }
+
+    handleDeletePet(e) {
+        const index = e.currentTarget.dataset.index;
+        const deletedPet = this.pets[index];
+
+        this.pets.splice(index, 1);
+        savePets(this.pets);
+
+        let allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
+        allPets = allPets.filter(p => !(p.ownerEmail === this.session.email && p.name === deletedPet.name));
+        localStorage.setItem("ph_all_pets", JSON.stringify(allPets));
+
+        this.renderPets();
+    }
+
+    handlePetFormSubmit(e) {
+        e.preventDefault();
+        const fileInput = document.getElementById('pet-photo');
+        const file = fileInput.files[0];
+
+        const save = async (photoData) => {
+            const petData = {
+                ownerEmail: this.session.email,
+                name: document.getElementById('pet-name').value,
+                species: document.getElementById('pet-species').value,
+                bday: document.getElementById('pet-bday').value,
+                weight: document.getElementById('pet-weight').value,
+                vax: document.getElementById('pet-vax').value,
+                photo: photoData || (this.editingIndex !== null ? this.pets[this.editingIndex].photo : null)
+            };
+
+            let allPets = JSON.parse(localStorage.getItem("ph_all_pets") || "[]");
+
+            if (this.editingIndex !== null) {
+                const oldPet = this.pets[this.editingIndex];
+                this.pets[this.editingIndex] = petData;
+
+                const globalIndex = allPets.findIndex(p => p.ownerEmail === this.session.email && p.name === oldPet.name);
+                if (globalIndex !== -1) {
+                    allPets[globalIndex] = petData;
+                }
+            } else {
+                if (this.pets.some(p => p.name === petData.name)) {
+                    alert("You already have a pet with this name.");
+                    return;
+                }
+                this.pets.push(petData);
+                allPets.push(petData);
+            }
+
+            savePets(this.pets);
+            localStorage.setItem("ph_all_pets", JSON.stringify(allPets));
+
+            this.closePetModal();
+            this.renderPets();
+        };
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const compressedPhoto = await compressImage(e.target.result);
+                save(compressedPhoto);
+            };
+            reader.onerror = (error) => {
+                console.error("Error reading file:", error);
+                alert("Error reading photo file. Saving pet without new image.");
+                save(null);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            save(null);
+        }
+    }
+
+    // APPOINTMENT MANAGEMENT METHODS
+    setupAppointmentManagement() {
+        this.appointmentForm.addEventListener("submit", this.handleAppointmentSubmit.bind(this));
+    }
+
+    refreshPetOptions() {
+        const appointmentPetSelect = document.getElementById("appointment-pet");
+        appointmentPetSelect.innerHTML = '';
+
+        if (this.pets.length === 0) {
+            const option = document.createElement('option');
+            option.textContent = 'No saved pets yet';
+            option.disabled = true;
+            option.selected = true;
+            appointmentPetSelect.appendChild(option);
+            return;
+        }
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.textContent = 'Select a pet';
+        defaultOpt.disabled = true;
+        defaultOpt.selected = true;
+        appointmentPetSelect.appendChild(defaultOpt);
+
+        this.pets.forEach(pet => {
+            const opt = document.createElement('option');
+            opt.value = pet.name;
+            opt.textContent = pet.name;
+            appointmentPetSelect.appendChild(opt);
+        });
+    }
+
+    refreshAppointments() {
+        const apps = loadAppointments();
+        const upcomingApps = apps.filter(a => a.status !== "Completed" && a.status !== "Rejected" && a.status !== "Cancelled").sort((a, b) => new Date(a.date) - new Date(b.date));
+        const appointmentsList = document.getElementById("appointments-list");
+
+        appointmentsList.innerHTML = '';
+        if (upcomingApps.length === 0) {
+            appointmentsList.innerHTML = '<p class="no-appointments">No upcoming appointments.</p>';
+            document.getElementById('stat-appointments').textContent = '0';
+            return;
+        }
+
+        upcomingApps.forEach(app => {
+            const div = document.createElement('div');
+            div.className = 'appointment-item';
+            div.innerHTML = `
+                <div class="appointment-header">
+                    <span class="pet-name">${app.petName}</span>
+                    <span class="status ${app.status.toLowerCase()}">${app.status}</span>
+                </div>
+                <div class="appointment-details">
+                    <p>Date: ${app.date}</p>
+                    <p>Reason: ${app.reason}</p>
+                </div>
+                <div class="appointment-actions">
+                    <button class="btn secondary action-btn" data-id="${app.id}" data-action="cancel">Cancel</button>
+                </div>
+            `;
+            appointmentsList.appendChild(div);
+        });
+        document.getElementById('stat-appointments').textContent = upcomingApps.length;
+
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', this.handleAppointmentAction.bind(this));
+        });
+    }
+
+    handleAppointmentSubmit(e) {
+        e.preventDefault();
+        const appointmentPetSelect = document.getElementById("appointment-pet");
+        const apps = loadAppointments();
+
+        const newApp = {
+            id: Date.now(),
+            ownerEmail: this.session.email,
+            petName: appointmentPetSelect.value,
+            date: document.getElementById("appointment-date").value,
+            reason: document.getElementById("appointment-reason").value,
+            status: "Pending"
+        };
+
+        apps.push(newApp);
+        saveAppointments(apps);
+        alert("Appointment request sent successfully! Awaiting confirmation from the vet.");
+        this.appointmentForm.reset();
+        this.refreshAppointments();
+    }
+
+    handleAppointmentAction(e) {
+        const appId = parseInt(e.currentTarget.dataset.id);
+        const action = e.currentTarget.dataset.action;
+        let apps = loadAppointments();
+
+        const appIndex = apps.findIndex(a => a.id === appId);
+        if (appIndex === -1) return;
+
+        if (action === 'cancel') {
+            apps[appIndex].status = "Cancelled";
+            saveAppointments(apps);
+            alert("Appointment successfully cancelled.");
+            this.refreshAppointments();
+        }
+    }
+
+    // CHAT MANAGEMENT METHODS
+    setupChat() {
+        this.sendMessageBtn.addEventListener("click", this.handleSendMessage.bind(this));
+        this.chatMessageInput.addEventListener("keypress", (e) => {
+            if (e.key === 'Enter') {
+                this.handleSendMessage();
+            }
+        });
+        this.renderChat();
+    }
+
+    renderChat() {
+        const chats = loadChats();
+        const vetEmail = "vet@clinic.com";
+        let convo = chats.find(c => c.user === this.session.email && c.vet === vetEmail);
+
+        this.chatBox.innerHTML = "";
+        if (!convo || convo.messages.length === 0) {
+            this.chatBox.innerHTML = "<p class='no-messages'>Start a conversation with your vet.</p>";
+            return;
+        }
+
+        convo.messages.forEach(msg => {
+            const messageDiv = document.createElement("div");
+            messageDiv.className = `chat-message ${msg.sender}`;
+            const bubble = document.createElement("div");
+            bubble.className = "chat-bubble";
+            bubble.textContent = msg.text;
+            messageDiv.appendChild(bubble);
+            this.chatBox.appendChild(messageDiv);
+        });
+        this.chatBox.scrollTop = this.chatBox.scrollHeight;
+    }
+
+    handleSendMessage() {
+        const text = this.chatMessageInput.value.trim();
+        if (!text) return;
+
+        const chats = loadChats();
+        const vetEmail = "vet@clinic.com";
+        let convo = chats.find(c => c.user === this.session.email && c.vet === vetEmail);
+
+        const newMessage = { sender: 'user', text, timestamp: Date.now() };
+
+        if (convo) {
+            convo.messages.push(newMessage);
+        } else {
+            convo = { user: this.session.email, vet: vetEmail, messages: [newMessage] };
+            chats.push(convo);
+        }
+
+        saveChats(chats);
+        this.chatMessageInput.value = '';
+        this.renderChat();
+    }
 
 
-// 2. PET FORM EVENT LISTENER (Handles photo loading and calls savePet)
-petForm.addEventListener('submit', e => {
-  e.preventDefault();
-  const fileInput = document.getElementById('pet-photo');
-  const file = fileInput.files[0];
+    // REMINDERS MANAGEMENT
+    setupReminderManagement() {
+        this.reminderForm.addEventListener("submit", this.handleAddReminder.bind(this));
+    }
 
-  if (file) {
-    const reader = new FileReader();
+    renderReminders() {
+        const allReminders = loadReminders();
+        const userReminders = allReminders.filter(r => r.user === this.session.email).sort((a, b) => new Date(a.date) - new Date(b.date));
 
-    reader.onload = async function() {
-      try {
-        const compressedPhotoData = await compressImage(reader.result);
-        savePet(compressedPhotoData);
-      } catch (e) {
-        console.error("Compression error:", e);
-        alert("Error compressing photo. Saving pet without new image.");
-        savePet(null);
-      }
-    };
+        this.remindersList.innerHTML = "";
+        if (userReminders.length === 0) {
+            this.remindersList.innerHTML = "<p>No reminders set.</p>";
+            document.getElementById('stat-reminders').textContent = '0';
+            return;
+        }
 
-    reader.onerror = function(error) {
-      console.error("FileReader error:", error);
-      alert("Error reading photo file. Saving pet without new image.");
-      savePet(null); 
-    };
-    
-    reader.readAsDataURL(file);
+        userReminders.forEach(r => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <span>${r.date} - ${r.text}</span>
+                <button class="delete-reminder" data-id="${r.id}">🗑️</button>
+            `;
+            this.remindersList.appendChild(li);
+        });
+        document.getElementById('stat-reminders').textContent = userReminders.length;
 
-  } else {
-    savePet(null); 
-  }
-});
-// ====== Refresh pet dropdown for appointments ======
-function refreshPetOptions() {
-  const appointmentPetSelect = document.getElementById("appointment-pet");
-  appointmentPetSelect.innerHTML = '';
-  if (pets.length === 0) {
-    const option = document.createElement('option');
-    option.textContent = 'No saved pets yet';
-    option.disabled = true;
-    option.selected = true;
-    appointmentPetSelect.appendChild(option);
-    return;
-  }
+        document.querySelectorAll(".delete-reminder").forEach(btn => {
+            btn.addEventListener("click", this.handleDeleteReminder.bind(this));
+        });
+    }
 
-  const defaultOpt = document.createElement('option');
-  defaultOpt.textContent = 'Select a pet';
-  defaultOpt.disabled = true;
-  defaultOpt.selected = true;
-  appointmentPetSelect.appendChild(defaultOpt);
+    handleAddReminder(e) {
+        e.preventDefault();
+        const allReminders = loadReminders();
 
-  pets.forEach(pet => {
-    const opt = document.createElement('option');
-    opt.value = pet.name;
-    opt.textContent = pet.name;
-    appointmentPetSelect.appendChild(opt);
-  });
+        const newReminder = {
+            id: Date.now(),
+            user: this.session.email,
+            date: document.getElementById("reminder-date").value,
+            text: document.getElementById("reminder-text").value
+        };
+
+        allReminders.push(newReminder);
+        saveReminders(allReminders);
+        this.reminderForm.reset();
+        this.renderReminders();
+    }
+
+    handleDeleteReminder(e) {
+        const id = parseInt(e.currentTarget.dataset.id);
+        let allReminders = loadReminders();
+
+        allReminders = allReminders.filter(r => r.id !== id);
+        saveReminders(allReminders);
+        this.renderReminders();
+    }
+
+    // CALENDAR MANAGEMENT
+    setupCalendar() {
+        this.monthSelect.addEventListener("change", this.renderDays.bind(this));
+        this.yearSelect.addEventListener("change", this.renderDays.bind(this));
+        this.closePopup.addEventListener("click", () => this.popup.classList.add("hidden"));
+
+        const currentYear = new Date().getFullYear();
+        const startYear = currentYear - 2;
+        this.yearSelect.innerHTML = Array.from({ length: 5 }, (_, i) => {
+            const year = startYear + i;
+            return `<option value="${year}" ${year === currentYear ? "selected" : ""}>${year}</option>`;
+        }).join("");
+
+        this.monthSelect.value = new Date().getMonth();
+        this.yearSelect.value = new Date().getFullYear();
+        this.renderDays();
+    }
+
+    renderDays() {
+        this.calendarGrid.innerHTML = "";
+        const month = +this.monthSelect.value;
+        const year = +this.yearSelect.value;
+        const appointments = loadAppointments();
+        const reminders = loadReminders();
+        const session = this.session;
+
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            this.calendarGrid.insertAdjacentHTML('beforeend', '<div class="calendar-day empty"></div>');
+        }
+
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+            const hasApp = appointments.some(a => a.date === dateStr);
+            const hasRem = reminders.some(r => r.date === dateStr && r.user === session.email);
+
+            const cell = document.createElement('div');
+            cell.className = 'calendar-day';
+            cell.textContent = day;
+            if (hasApp || hasRem) cell.classList.add("marked");
+
+            cell.addEventListener("click", () => this.openPopup(dateStr));
+            this.calendarGrid.appendChild(cell);
+        }
+    }
+
+    openPopup(dateStr) {
+        const popupDate = document.getElementById("popup-date");
+        const popupList = document.getElementById("popup-list");
+        const appointments = loadAppointments();
+        const reminders = loadReminders();
+        const session = this.session;
+
+        popupDate.textContent = dateStr;
+        popupList.innerHTML = "";
+
+        const events = [
+            ...appointments.filter(a => a.date === dateStr),
+            ...reminders.filter(r => r.date === dateStr && r.user === session.email)
+        ];
+
+        if (events.length === 0) {
+            popupList.innerHTML = "<li>No events on this date.</li>";
+        } else {
+            events.forEach(ev => {
+                const li = document.createElement("li");
+                li.textContent = ev.petName
+                    ? `${ev.petName} — ${ev.reason || "Check-up"} (${ev.status})`
+                    : `🔔 ${ev.text}`;
+                popupList.appendChild(li);
+            });
+        }
+
+        this.popup.classList.remove("hidden");
+    }
 }
 
-// ====== CHAT SYSTEM ======
-const chatBox = document.getElementById("chat-box");
-const chatMessage = document.getElementById("chat-message");
-const sendMessageBtn = document.getElementById("send-message");
-
-function loadChats() {
-  return JSON.parse(localStorage.getItem("ph_chats") || "[]");
-}
-function saveChats(chats) {
-  localStorage.setItem("ph_chats", JSON.stringify(chats));
-}
-
-function renderChat() {
-  const session = JSON.parse(localStorage.getItem("ph_session"));
-  const vetEmail = "vet@clinic.com"; // same vet reference
-  const chats = loadChats();
-  const convo = chats.find(c => c.user === session.email && c.vet === vetEmail);
-
-  chatBox.innerHTML = "";
-  if (!convo || convo.messages.length === 0) {
-    chatBox.innerHTML = "<p>No messages yet.</p>";
-    return;
-  }
-
-  convo.messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = `chat-message ${msg.sender}`;
-    div.textContent = msg.text;
-    chatBox.appendChild(div);
-  });
-
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-sendMessageBtn.addEventListener("click", () => {
-  const text = chatMessage.value.trim();
-  if (!text) return;
-
-  const session = JSON.parse(localStorage.getItem("ph_session"));
-  const vetEmail = "vet@clinic.com";
-  const chats = loadChats();
-  let convo = chats.find(c => c.user === session.email && c.vet === vetEmail);
-
-  if (!convo) {
-    convo = { user: session.email, vet: vetEmail, messages: [] };
-    chats.push(convo);
-  }
-
-  convo.messages.push({
-    sender: "user",
-    text,
-    time: new Date().toLocaleString()
-  });
-
-  saveChats(chats);
-  chatMessage.value = "";
-  renderChat();
-});
-
-// Update automatically if another tab changes localStorage (vet replies)
-window.addEventListener("storage", (e) => {
-  if (e.key === "ph_chats") renderChat();
-});
-
-document.addEventListener("DOMContentLoaded", renderChat);
-
-
-
-
-// ====== Appointments ======
-function loadAppointments() {
-  return JSON.parse(localStorage.getItem("ph_appointments") || "[]");
-}
-function saveAppointments(apps) {
-  localStorage.setItem("ph_appointments", JSON.stringify(apps));
-}
-const appointmentForm = document.getElementById("appointment-form");
-const appointmentsList = document.getElementById("appointments-list");
-
-function refreshAppointments() {
-  const apps = loadAppointments();
-  appointmentsList.innerHTML = "";
-
-  if (apps.length === 0) {
-    appointmentsList.innerHTML = "<li>No appointments yet.</li>";
-    return;
-  }
-
-  apps.forEach(app => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${app.petName}</strong> — ${app.date} <br>
-      Reason: ${app.reason} <br>
-      Status: <span style="font-weight:bold; color:${app.status === 'Confirmed' ? 'green' : app.status === 'Rejected' ? 'red' : 'orange'}">
-        ${app.status}
-      </span>
-    `;
-    appointmentsList.appendChild(li);
-  });
-}
-
-appointmentForm.addEventListener("submit", e => {
-  e.preventDefault();
-  const appointmentPetSelect = document.getElementById("appointment-pet");
-  const apps = loadAppointments();
-  const newApp = {
-    id: Date.now(),
-    petName: appointmentPetSelect.value,
-    date: document.getElementById("appointment-date").value,
-    reason: document.getElementById("appointment-reason").value,
-    status: "Pending"
-  };
-  apps.push(newApp);
-  saveAppointments(apps);
-  alert("Appointment booked successfully!");
-  appointmentForm.reset();
-  refreshAppointments();
-});
-
-// ====== Initial Load ======
+// Instantiate and Initialize the Dashboard Class
 document.addEventListener("DOMContentLoaded", () => {
-  renderPets();
-  refreshPetOptions();
-  refreshAppointments();
-});
-
-// ====== Logout ======
-document.getElementById('logout').addEventListener('click', () => {
-  localStorage.removeItem('ph_session');
-  window.location.href = 'index.html';
-});
-
-
-// ===== SIMPLE REMINDERS DISPLAY =====
-function renderReminders() {
-  const session = JSON.parse(localStorage.getItem("ph_session"));
-  const allReminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
-  const userReminders = allReminders.filter(r => r.user === session.email);
-
-  const remindersList = document.getElementById("reminders-list");
-  remindersList.innerHTML = "";
-
-  if (userReminders.length === 0) {
-    remindersList.innerHTML = "<li>No reminders yet.</li>";
-    return;
-  }
-
-  userReminders.forEach(r => {
-    const li = document.createElement("li");
-    li.innerHTML = `<strong>${r.text}</strong> — <em>${r.date}</em>`;
-    remindersList.appendChild(li);
-  });
-}
-
-document.addEventListener("DOMContentLoaded", renderReminders);
-
-
-function renderDashboard() {
-  const pets = JSON.parse(localStorage.getItem("pets") || "[]");
-  const appointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
-  const reminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
-  const session = JSON.parse(localStorage.getItem("ph_session"));
-
-  // Stats
-  document.getElementById("stat-pets").textContent = pets.length;
-  document.getElementById("stat-appointments").textContent = appointments.length;
-  document.getElementById("stat-reminders").textContent =
-    reminders.filter(r => r.user === session.email).length;
-
-  // Next Appointment
-  const nextApp = appointments.sort((a, b) => new Date(a.date) - new Date(b.date))[0];
-  const nextAppBox = document.getElementById("next-appointment");
-  nextAppBox.innerHTML = nextApp
-    ? `<p><strong>${nextApp.petName}</strong> — ${nextApp.date}<br><em>${nextApp.reason}</em></p>`
-    : "<p>No upcoming appointments yet.</p>";
-
-  // Recent Pets
-  const recentPetsList = document.getElementById("recent-pets");
-  recentPetsList.innerHTML = pets.length
-    ? pets.slice(-3).map(p => `<li>${p.name} — ${p.species}</li>`).join("")
-    : "<li>No pets added yet.</li>";
-
-  // Recent Reminders
-  const recentRemindersList = document.getElementById("recent-reminders");
-  const userReminders = reminders.filter(r => r.user === session.email);
-  recentRemindersList.innerHTML = userReminders.length
-    ? userReminders.slice(-3).map(r => `<li>${r.text} — <em>${r.date}</em></li>`).join("")
-    : "<li>No reminders yet.</li>";
-}
-
-document.addEventListener("DOMContentLoaded", renderDashboard);
-
-      // Calendar
-function renderCalendarWithDropdown() {
-  const calendarGrid = document.getElementById("calendar-grid");
-  const monthSelect = document.getElementById("calendar-month");
-  const yearSelect = document.getElementById("calendar-year");
-
-  const appointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
-  const reminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
-  const session = JSON.parse(localStorage.getItem("ph_session")) || { email: "" };
-
-  const currentDate = new Date();
-  let currentMonth = currentDate.getMonth();
-  let currentYear = currentDate.getFullYear();
-
-  // --- Populate dropdowns ---
-  const months = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
-  monthSelect.innerHTML = months.map((m, i) =>
-    `<option value="${i}" ${i === currentMonth ? "selected" : ""}>${m}</option>`
-  ).join("");
-
-  const startYear = 2020;
-  const endYear = 2030;
-  yearSelect.innerHTML = Array.from({ length: endYear - startYear + 1 }, (_, i) => {
-    const year = startYear + i;
-    return `<option value="${year}" ${year === currentYear ? "selected" : ""}>${year}</option>`;
-  }).join("");
-
-  // --- Function to render calendar ---
-  function renderDays(month, year) {
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-
-    let daysHTML = "";
-
-    // Fill empty slots before first day
-    for (let i = 0; i < firstDay.getDay(); i++) {
-      daysHTML += `<div class="calendar-day empty"></div>`;
+    const dashboard = new PetOwnerDashboard();
+    if (dashboard.session) {
+        dashboard.init();
     }
-
-    for (let day = 1; day <= lastDay.getDate(); day++) {
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const hasAppointments = appointments.some(a => a.date === dateStr);
-      const hasReminders = reminders.some(r => r.user === session.email && r.date === dateStr);
-
-      const classes = [
-        "calendar-day",
-        hasAppointments ? "appointment" : "",
-        hasReminders ? "reminder" : ""
-      ].join(" ");
-
-      daysHTML += `<div class="${classes}" data-date="${dateStr}">${day}</div>`;
-    }
-
-    calendarGrid.innerHTML = daysHTML;
-
-    // Click event for details
-    document.querySelectorAll(".calendar-day").forEach(dayEl => {
-      dayEl.addEventListener("click", () => {
-        const selectedDate = dayEl.dataset.date;
-        if (!selectedDate) return;
-
-        const dayAppointments = appointments.filter(a => a.date === selectedDate);
-        const dayReminders = reminders.filter(r => r.user === session.email && r.date === selectedDate);
-
-        showCalendarPopup(selectedDate, dayAppointments, dayReminders);
-      });
-    });
-  }
-
-  // Initial render
-  renderDays(currentMonth, currentYear);
-
-  // Re-render when dropdown changes
-  monthSelect.addEventListener("change", () => {
-    currentMonth = parseInt(monthSelect.value);
-    renderDays(currentMonth, currentYear);
-  });
-
-  yearSelect.addEventListener("change", () => {
-    currentYear = parseInt(yearSelect.value);
-    renderDays(currentMonth, currentYear);
-  });
-}
-
-// Popup show/hide
-function showCalendarPopup(date, appointments, reminders) {
-  const popup = document.getElementById("calendar-popup");
-  const popupDate = document.getElementById("popup-date");
-  const popupList = document.getElementById("popup-list");
-
-  popupDate.textContent = date;
-
-  if (!appointments.length && !reminders.length) {
-    popupList.innerHTML = "<li>No events for this date.</li>";
-  } else {
-    popupList.innerHTML = `
-      ${appointments.map(a => `<li><strong>🐾 ${a.petName}</strong> — ${a.reason}</li>`).join("")}
-      ${reminders.map(r => `<li><strong>🔔 Reminder:</strong> ${r.text}</li>`).join("")}
-    `;
-  }
-
-  popup.classList.remove("hidden");
-}
-
-document.getElementById("close-calendar-popup").addEventListener("click", () => {
-  document.getElementById("calendar-popup").classList.add("hidden");
-});
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderDashboard();
-  renderCalendarWithDropdown();
-});
-
-
-function renderCalendarWithDropdown() {
-  const calendarGrid = document.getElementById("calendar-grid");
-  const monthSelect = document.getElementById("calendar-month");
-  const yearSelect = document.getElementById("calendar-year");
-  const appointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
-  const reminders = JSON.parse(localStorage.getItem("ph_reminders") || "[]");
-  const session = JSON.parse(localStorage.getItem("ph_session"));
-
-  // Fill months
-  const months = [
-    "January","February","March","April","May","June",
-    "July","August","September","October","November","December"
-  ];
-  months.forEach((m, i) => {
-    const opt = document.createElement("option");
-    opt.value = i;
-    opt.textContent = m;
-    monthSelect.appendChild(opt);
-  });
-
-  // Fill years (5 years range)
-  const thisYear = new Date().getFullYear();
-  for (let y = thisYear - 2; y <= thisYear + 2; y++) {
-    const opt = document.createElement("option");
-    opt.value = y;
-    opt.textContent = y;
-    yearSelect.appendChild(opt);
-  }
-
-  // Draw Calendar
-  function renderDays() {
-    calendarGrid.innerHTML = "";
-    const month = +monthSelect.value;
-    const year = +yearSelect.value;
-    const firstDay = new Date(year, month, 1).getDay();
-    const totalDays = new Date(year, month + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
-      const empty = document.createElement("div");
-      empty.className = "day empty";
-      calendarGrid.appendChild(empty);
-    }
-
-    for (let day = 1; day <= totalDays; day++) {
-      const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-      const cell = document.createElement("div");
-      cell.className = "day";
-      cell.textContent = day;
-
-      // Highlight booked appointments or reminders
-      const hasApp = appointments.some(a => a.date === dateStr);
-      const hasRem = reminders.some(r => r.date === dateStr && r.user === session.email);
-
-      if (hasApp || hasRem) cell.classList.add("marked");
-
-      cell.addEventListener("click", () => openPopup(dateStr));
-      calendarGrid.appendChild(cell);
-    }
-  }
-
-  // Popup
-  const popup = document.getElementById("calendar-popup");
-  const popupDate = document.getElementById("popup-date");
-  const popupList = document.getElementById("popup-list");
-  const closePopup = document.getElementById("close-calendar-popup");
-
-  function openPopup(dateStr) {
-    popupDate.textContent = dateStr;
-    popupList.innerHTML = "";
-
-    const events = [
-      ...appointments.filter(a => a.date === dateStr),
-      ...reminders.filter(r => r.date === dateStr && r.user === session.email)
-    ];
-
-    if (events.length === 0) {
-      popupList.innerHTML = "<li>No events on this date.</li>";
-    } else {
-      events.forEach(ev => {
-        const li = document.createElement("li");
-        li.textContent = ev.petName
-          ? `${ev.petName} — ${ev.reason || "Check-up"}`
-          : `🔔 ${ev.text}`;
-        popupList.appendChild(li);
-      });
-    }
-
-    popup.classList.remove("hidden");
-  }
-
-  closePopup.addEventListener("click", () => popup.classList.add("hidden"));
-
-  monthSelect.value = new Date().getMonth();
-  yearSelect.value = new Date().getFullYear();
-  renderDays();
-
-  monthSelect.addEventListener("change", renderDays);
-  yearSelect.addEventListener("change", renderDays);
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  renderDashboard();
-  renderCalendarWithDropdown();
 });
