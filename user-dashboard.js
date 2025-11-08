@@ -74,6 +74,12 @@ class PetOwnerDashboard {
         this.petModal = document.getElementById('pet-modal');
         this.cancelPet = document.getElementById('cancel-pet');
         this.addPetBtn = document.getElementById('add-pet-btn');
+        this.recordPetSelect = document.getElementById("record-pet-select");
+        this.recordsContent = document.querySelector(".records-content");
+        this.visitsList = document.getElementById("visits-list");
+        this.medicationsList = document.getElementById("medications-list");
+        this.vaccinationsList = document.getElementById("vaccinations-list");
+        this.recordTabs = document.querySelectorAll(".record-tabs .tab-link");
         this.appointmentForm = document.getElementById('appointment-form');
         this.appointmentsList = document.getElementById("appointments-list");
         this.reminderForm = document.getElementById("reminder-form");
@@ -136,6 +142,67 @@ class PetOwnerDashboard {
             this.petForm.insertBefore(petPhotoInput, this.petForm.querySelector('.modal-actions'));
         }
     }
+    setupRecordManagement() {
+        if (this.recordPetSelect) {
+            this.recordPetSelect.addEventListener('change', this.handlePetSelectChange.bind(this));
+        }
+
+        // 2. Tab Click Listener
+        this.recordTabs.forEach(tab => {
+            tab.addEventListener('click', this.handleTabClick.bind(this));
+        });
+    }
+
+    handlePetSelectChange(e) {
+        const petName = e.target.value;
+        if (petName) {
+            this.recordsContent.classList.remove('hidden');
+            this.renderPetRecords(petName);
+        } else {
+            this.recordsContent.classList.add('hidden');
+        }
+    }
+
+    handleTabClick(e) {
+        const type = e.target.dataset.recordType;
+
+        this.recordTabs.forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.record-panel').forEach(panel => panel.classList.add('hidden'));
+
+        e.target.classList.add('active');
+        document.getElementById(`records-${type}`).classList.remove('hidden');
+    }
+
+    renderPetRecords(petName) {
+        const pet = this.pets.find(p => p.name === petName);
+        if (!pet) return;
+
+        const allAppointments = JSON.parse(localStorage.getItem("ph_appointments") || "[]");
+        const petAppointments = allAppointments
+            .filter(a => a.petName === petName && a.ownerEmail === this.session.email)
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        // 1. Visits History
+        this.visitsList.innerHTML = petAppointments.length === 0 
+            ? '<li>No visits recorded.</li>'
+            : petAppointments.map(a => `
+                <li>
+                    <strong>${a.date}${a.time ? ` at ${a.time}` : ''}</strong><br>
+                    Reason: ${a.reason} | Status: ${a.status}
+                </li>
+              `).join('');
+
+
+        // Medications
+        this.medicationsList.innerHTML = pet.meds 
+            ? `<li>${pet.meds.replace(/\n/g, '<br>')}</li>`
+            : `<li>No specific medication records.</li>`;
+        
+        // Vaccinations
+        this.vaccinationsList.innerHTML = pet.vax && pet.vax.trim() !== ''
+            ? `<li>${pet.vax.replace(/\n/g, '<br>')}</li>`
+            : `<li>No vaccination notes recorded.</li>`;
+    }
 
     // INITIALIZATION AND NAVIGATION
     init() {
@@ -143,6 +210,7 @@ class PetOwnerDashboard {
         this.setupPetManagement();
         this.setupAppointmentManagement();
         this.setupReminderManagement();
+        this.setupRecordManagement();
         this.setupChat();
         this.setupCalendar();
 
@@ -173,6 +241,22 @@ class PetOwnerDashboard {
 
         if (target === 'chat') this.renderChat();
         if (target === 'reminders') this.renderReminders();
+
+        if (target === 'records') {
+            const selectedPet = this.recordPetSelect.value;
+            
+            if (selectedPet) {
+                this.recordsContent.classList.remove('hidden');
+                this.renderPetRecords(selectedPet);
+            } else if (this.pets && this.pets.length > 0) {
+                const firstPetName = this.pets[0].name;
+                this.recordPetSelect.value = firstPetName;
+                this.recordsContent.classList.remove('hidden');
+                this.renderPetRecords(firstPetName);
+            } else {
+                this.recordsContent.classList.add('hidden');
+            }
+        }
     }
 
     handleLogout() {
@@ -329,39 +413,33 @@ class PetOwnerDashboard {
     }
 
     refreshPetOptions() {
-        const appointmentPetSelect = document.getElementById("appointment-pet");
-        const reminderPetSelect = document.getElementById("reminder-pet");
-        
-        appointmentPetSelect.innerHTML = '';
-        reminderPetSelect.innerHTML = '';
+        // Get all three pet selection elements (filter out nulls in case any ID is missing in the HTML)
+        const petSelects = [
+            document.getElementById("appointment-pet"), 
+            document.getElementById("reminder-pet"),
+            document.getElementById("record-pet-select")
+        ].filter(el => el !== null); 
 
-        if (this.pets.length === 0) {
-            const option = document.createElement('option');
-            option.textContent = 'No saved pets yet - Add one first!';
-            option.value = '';
-            
-            appointmentPetSelect.appendChild(option.cloneNode(true)); 
-            reminderPetSelect.appendChild(option); 
-            
-            return;
-        }
+        // Clear previous options in ALL dropdowns
+        petSelects.forEach(select => select.innerHTML = '');
 
+        const userPets = this.pets; 
+
+        // 1. Create Default/Placeholder Option
         const defaultOpt = document.createElement('option');
-        defaultOpt.textContent = 'Select a pet';
+        defaultOpt.textContent = userPets.length === 0 ? 'Add a pet first!' : 'Select a pet';
         defaultOpt.value = '';
         defaultOpt.disabled = true;
         defaultOpt.selected = true;
-        
-        appointmentPetSelect.appendChild(defaultOpt.cloneNode(true));
-        reminderPetSelect.appendChild(defaultOpt);
 
-        this.pets.forEach(pet => {
+        petSelects.forEach(select => select.appendChild(defaultOpt.cloneNode(true)));
+
+        // 2. Add Pet Options
+        userPets.forEach(pet => {
             const opt = document.createElement('option');
             opt.value = pet.name;
             opt.textContent = pet.name;
-            
-            appointmentPetSelect.appendChild(opt.cloneNode(true));
-            reminderPetSelect.appendChild(opt);
+            petSelects.forEach(select => select.appendChild(opt.cloneNode(true)));
         });
     }
 

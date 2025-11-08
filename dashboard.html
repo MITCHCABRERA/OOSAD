@@ -11,6 +11,7 @@
     <h2>🐾 PetHealthConnect</h2>
     <button class="nav-link active" data-panel="dashboard">Dashboard</button>
     <button class="nav-link" data-panel="pets">My Pets</button>
+    <button class="nav-link" data-panel="records">Health Records</button>
     <button class="nav-link" data-panel="appointments">Appointments</button>
     <button class="nav-link" data-panel="bookings">Book Appointment</button>
     <button class="nav-link" data-panel="reminders">Reminders</button>
@@ -79,6 +80,48 @@
       <h2>My Pets</h2>
       <button id="add-pet-btn" class="btn primary">Add New Pet</button>
   </div>
+  
+  <div id="pets-list" class="pets-list">
+    <p>Loading pets...</p>
+  </div>
+</section>
+<section id="records" class="content-panel">
+
+<section id="records" class="content-panel">
+  <h2>Health Records</h2>
+  
+  <div class="card">
+    <h3>Select Pet</h3>
+    <select id="record-pet-select" class="form-control"></select>
+  </div>
+
+  <div class="card records-content hidden">
+    <div class="record-tabs">
+      <button class="tab-link active" data-record-type="visits">Visits</button>
+      <button class="tab-link" data-record-type="medications">Medications</button>
+      <button class="tab-link" data-record-type="vaccinations">Vaccinations</button>
+    </div>
+
+    <div id="records-container">
+      
+      <div id="records-visits" class="record-panel active">
+        <h4>Visit History</h4>
+        <ul id="visits-list"><li>No visits recorded.</li></ul>
+      </div>
+
+      <div id="records-medications" class="record-panel hidden">
+        <h4>Medication History</h4>
+        <ul id="medications-list"><li>No medications recorded.</li></ul>
+      </div>
+
+      <div id="records-vaccinations" class="record-panel hidden">
+        <h4>Vaccination History</h4>
+        <ul id="vaccinations-list"><li>No vaccinations recorded.</li></ul>
+      </div>
+
+    </div>
+  </div>
+</section>
 
   <div id="pets-list" class="pets-list">
     <p>Loading pets...</p>
