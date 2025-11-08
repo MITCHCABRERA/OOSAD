@@ -646,3 +646,52 @@ label {
     font-size: 1.5rem;
     line-height: 0;
 }
+
+/* Health Records Styling */
+.record-tabs {
+    display: flex;
+    margin-bottom: 1rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.record-tabs .tab-link {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    color: var(--text-dark);
+}
+
+.record-tabs .tab-link.active {
+    color: var(--primary);
+    border-bottom: 3px solid var(--primary);
+    font-weight: 600;
+}
+
+.record-panel {
+    margin-top: 1rem;
+}
+
+.record-panel.hidden {
+    display: none;
+}
+
+.records-content.hidden {
+    display: none;
+}
+
+#visits-list, #medications-list, #vaccinations-list {
+    list-style: none;
+    padding: 0;
+}
+
+#visits-list li, #medications-list li, #vaccinations-list li {
+    background: #f8fafc;
+    border-radius: 6px;
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid var(--secondary);
+}
