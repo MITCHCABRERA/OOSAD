@@ -62,6 +62,8 @@ class PetOwnerDashboard {
 
         this.pets = loadPets().filter(p => p.ownerEmail === this.session.email);
         this.editingIndex = null;
+        this.editingAppId = null;
+        this.editingRemId = null;
 
         // DOM Element
         this.navLinks = document.querySelectorAll('.nav-link');
@@ -87,6 +89,33 @@ class PetOwnerDashboard {
 
         this.setOwnerName();
         this.ensurePetPhotoInput();
+    }
+
+    openEditAppointment(app) {
+        this.editingAppId = app.id;
+
+        document.getElementById("appointment-pet").value = app.petName;
+        document.getElementById("appointment-date").value = app.date;
+        document.getElementById("appointment-time").value = app.time;
+        document.getElementById("appointment-reason").value = app.reason;
+        
+        this.appointmentForm.querySelector('button[type="submit"]').textContent = 'Update Appointment';
+        document.querySelector('.nav-link[data-panel="bookings"]').click();
+
+    }
+
+    openEditReminder(reminder) {
+        this.refreshPetOptions(); 
+
+        this.editingRemId = reminder.id;
+
+        document.getElementById("reminder-pet").value = reminder.petName;
+        document.getElementById("reminder-date").value = reminder.date;
+        document.getElementById("reminder-time").value = reminder.time || '';
+        document.getElementById("reminder-text").value = reminder.text;
+        
+        this.reminderForm.querySelector('button[type="submit"]').textContent = 'Update Reminder';
+        document.querySelector('.nav-link[data-panel="reminders"]').click();
     }
 
     setOwnerName() {
@@ -120,6 +149,7 @@ class PetOwnerDashboard {
         this.renderPets();
         this.refreshAppointments();
         this.renderReminders();
+        this.refreshPetOptions();
     }
 
     setupNavigation() {
@@ -136,12 +166,11 @@ class PetOwnerDashboard {
         this.navLinks.forEach(btn => btn.classList.remove('active'));
         link.classList.add('active');
 
-        // Use data-panel and .content-panel
         const target = link.dataset.panel;
         this.panels.forEach(panel => {
             panel.classList.toggle('active', panel.id === target);
         });
-        // Rerender chat/calendar when opened to ensure fresh data/scroll
+
         if (target === 'chat') this.renderChat();
         if (target === 'reminders') this.renderReminders();
     }
@@ -301,28 +330,38 @@ class PetOwnerDashboard {
 
     refreshPetOptions() {
         const appointmentPetSelect = document.getElementById("appointment-pet");
+        const reminderPetSelect = document.getElementById("reminder-pet");
+        
         appointmentPetSelect.innerHTML = '';
+        reminderPetSelect.innerHTML = '';
 
         if (this.pets.length === 0) {
             const option = document.createElement('option');
-            option.textContent = 'No saved pets yet';
-            option.disabled = true;
-            option.selected = true;
-            appointmentPetSelect.appendChild(option);
+            option.textContent = 'No saved pets yet - Add one first!';
+            option.value = '';
+            
+            appointmentPetSelect.appendChild(option.cloneNode(true)); 
+            reminderPetSelect.appendChild(option); 
+            
             return;
         }
 
         const defaultOpt = document.createElement('option');
         defaultOpt.textContent = 'Select a pet';
+        defaultOpt.value = '';
         defaultOpt.disabled = true;
         defaultOpt.selected = true;
-        appointmentPetSelect.appendChild(defaultOpt);
+        
+        appointmentPetSelect.appendChild(defaultOpt.cloneNode(true));
+        reminderPetSelect.appendChild(defaultOpt);
 
         this.pets.forEach(pet => {
             const opt = document.createElement('option');
             opt.value = pet.name;
             opt.textContent = pet.name;
-            appointmentPetSelect.appendChild(opt);
+            
+            appointmentPetSelect.appendChild(opt.cloneNode(true));
+            reminderPetSelect.appendChild(opt);
         });
     }
 
@@ -348,9 +387,11 @@ class PetOwnerDashboard {
                 </div>
                 <div class="appointment-details">
                     <p>Date: ${app.date}</p>
+                    <p>Time: ${app.time}</p>
                     <p>Reason: ${app.reason}</p>
                 </div>
                 <div class="appointment-actions">
+                    <button class="btn primary action-btn" data-id="${app.id}" data-action="edit">Reschedule</button>
                     <button class="btn secondary action-btn" data-id="${app.id}" data-action="cancel">Cancel</button>
                 </div>
             `;
@@ -366,22 +407,42 @@ class PetOwnerDashboard {
     handleAppointmentSubmit(e) {
         e.preventDefault();
         const appointmentPetSelect = document.getElementById("appointment-pet");
-        const apps = loadAppointments();
+        let apps = loadAppointments();
+        const submitButton = this.appointmentForm.querySelector('button[type="submit"]');
 
-        const newApp = {
-            id: Date.now(),
+        const appData = {
             ownerEmail: this.session.email,
             petName: appointmentPetSelect.value,
             date: document.getElementById("appointment-date").value,
+            time: document.getElementById("appointment-time").value,
             reason: document.getElementById("appointment-reason").value,
-            status: "Pending"
         };
 
-        apps.push(newApp);
+        if (this.editingAppId !== null) {
+            // Edit existing appointment
+            const appIndex = apps.findIndex(a => a.id === this.editingAppId);
+            if (appIndex !== -1) {
+                apps[appIndex] = { ...apps[appIndex], ...appData }; 
+                alert("Appointment successfully updated!");
+            }
+            this.editingAppId = null;
+            submitButton.textContent = 'Request Appointment';
+        } else {
+            // New appointment
+            const newApp = {
+                id: Date.now(),
+                ...appData,
+                status: "Pending"
+            };
+
+            apps.push(newApp);
+            alert("Appointment request sent successfully! Awaiting confirmation from the vet.");
+        }
+
         saveAppointments(apps);
-        alert("Appointment request sent successfully! Awaiting confirmation from the vet.");
         this.appointmentForm.reset();
         this.refreshAppointments();
+        this.renderDays();
     }
 
     handleAppointmentAction(e) {
@@ -391,12 +452,15 @@ class PetOwnerDashboard {
 
         const appIndex = apps.findIndex(a => a.id === appId);
         if (appIndex === -1) return;
+        const appToEdit = apps[appIndex];
 
         if (action === 'cancel') {
             apps[appIndex].status = "Cancelled";
             saveAppointments(apps);
             alert("Appointment successfully cancelled.");
             this.refreshAppointments();
+        } else if (action === 'edit') {
+            this.openEditAppointment(appToEdit);
         }
     }
 
@@ -459,7 +523,7 @@ class PetOwnerDashboard {
 
     // REMINDERS MANAGEMENT
     setupReminderManagement() {
-        this.reminderForm.addEventListener("submit", this.handleAddReminder.bind(this));
+        this.reminderForm.addEventListener("submit", this.handleReminderSubmit.bind(this));
     }
 
     renderReminders() {
@@ -476,33 +540,75 @@ class PetOwnerDashboard {
         userReminders.forEach(r => {
             const li = document.createElement("li");
             li.innerHTML = `
-                <span>${r.date} - ${r.text}</span>
-                <button class="delete-reminder" data-id="${r.id}">🗑️</button>
+                <span class="reminder-text">${r.text} for ${r.petName || 'All Pets'}</span>
+                <span class="reminder-date">
+                    ${r.date}${r.time ? ` at ${r.time}` : ''}
+                </span>
+                <div class="reminder-actions">
+                    <button class="btn primary edit-reminder" data-id="${r.id}">Edit</button>
+                    <button class="delete-reminder" data-id="${r.id}">Delete</button>
+                </div>
             `;
             this.remindersList.appendChild(li);
         });
         document.getElementById('stat-reminders').textContent = userReminders.length;
 
+        // Listener for the DELETE button
         document.querySelectorAll(".delete-reminder").forEach(btn => {
             btn.addEventListener("click", this.handleDeleteReminder.bind(this));
         });
+        
+        // Listener for the EDIT button
+        document.querySelectorAll('.edit-reminder').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const reminderId = parseInt(e.currentTarget.dataset.id);
+                const allReminders = loadReminders(); 
+                const reminderToEdit = allReminders.find(r => r.id === reminderId);
+                
+                if (reminderToEdit) {
+                    this.openEditReminder(reminderToEdit);
+                }
+            });
+        });
     }
 
-    handleAddReminder(e) {
+        handleReminderSubmit(e) {
         e.preventDefault();
-        const allReminders = loadReminders();
+        
+        let reminders = loadReminders();
+        const submitButton = this.reminderForm.querySelector('button[type="submit"]');
 
-        const newReminder = {
-            id: Date.now(),
+        const reminderData = {
             user: this.session.email,
+            petName: document.getElementById("reminder-pet").value,
             date: document.getElementById("reminder-date").value,
-            text: document.getElementById("reminder-text").value
+            time: document.getElementById("reminder-time").value || '',
+            text: document.getElementById("reminder-text").value,
         };
 
-        allReminders.push(newReminder);
-        saveReminders(allReminders);
+        if (this.editingRemId !== null) {
+            // Edit existing reminder
+            const remIndex = reminders.findIndex(r => r.id === this.editingRemId);
+            if (remIndex !== -1) {
+                reminders[remIndex] = { ...reminders[remIndex], ...reminderData }; 
+                alert("Reminder successfully updated!");
+            }
+            this.editingRemId = null;
+            submitButton.textContent = 'Set Reminder';
+
+        } else {
+            const newReminder = {
+                id: Date.now(),
+                ...reminderData
+            };
+            reminders.push(newReminder);
+            alert("Reminder set successfully!");
+        }
+
+        saveReminders(reminders);
         this.reminderForm.reset();
         this.renderReminders();
+        this.renderDays(); 
     }
 
     handleDeleteReminder(e) {
@@ -510,8 +616,10 @@ class PetOwnerDashboard {
         let allReminders = loadReminders();
 
         allReminders = allReminders.filter(r => r.id !== id);
+        
         saveReminders(allReminders);
         this.renderReminders();
+        this.renderDays();
     }
 
     // CALENDAR MANAGEMENT
@@ -582,9 +690,11 @@ class PetOwnerDashboard {
         } else {
             events.forEach(ev => {
                 const li = document.createElement("li");
+                const eventTime = ev.time ? ` at ${ev.time}` : '';
+
                 li.textContent = ev.petName
-                    ? `${ev.petName} — ${ev.reason || "Check-up"} (${ev.status})`
-                    : `🔔 ${ev.text}`;
+                    ? `${ev.petName} — ${ev.reason || "Check-up"} (${ev.status})${eventTime}`
+                    : `🔔 ${ev.text}${eventTime}`;
                 popupList.appendChild(li);
             });
         }
