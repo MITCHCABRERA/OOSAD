@@ -10,7 +10,7 @@
   <aside class="sidebar">
     <h2>🐾 Vet Portal</h2>
     <button class="nav-link active" data-panel="overview">Overview</button>
-    <button class="nav-link" data-panel="pets">All Pets</button>
+    <button class="nav-link" data-panel="pets">Health Records</button>
     <button class="nav-link" data-panel="appointments">Appointments</button>
     <button class="nav-link" data-panel="reports">Reports</button>
     <button class="nav-link" data-panel="chat">Chat 💬</button>
@@ -63,18 +63,69 @@
 
     <!-- 🐕 All Pets -->
     <section id="pets" class="content-panel">
-      <div class="card">
         <h2>All Registered Pets</h2>
         <div id="vet-pets-list" class="pets-grid"></div>
-      </div>
     </section>
+
+    <section id="health-records" class="content-panel">
+  <h2><span id="record-pet-name">Pet's</span> Health Records</h2>
+  <button id="add-record-btn" class="btn primary">➕ Add New Record</button>
+  
+  <div class="card">
+    <div class="record-tabs">
+      <button class="tab-link active" data-record-type="visits">Visitation History</button>
+      <button class="tab-link" data-record-type="medications">Medication History</button>
+      <button class="tab-link" data-record-type="vaccinations">Vaccination Records</button>
+    </div>
+
+    <div id="records-visits" class="record-panel">
+      <h3>Visits History</h3>
+      <ul id="vet-visits-list" class="list-unstyled"></ul>
+    </div>
+
+    <div id="records-medications" class="record-panel hidden">
+      <h3>Medication History</h3>
+      <ul id="vet-medications-list" class="list-unstyled"></ul>
+    </div>
+    
+    <div id="records-vaccinations" class="record-panel hidden">
+      <h3>Vaccination Records</h3>
+      <ul id="vet-vaccinations-list" class="list-unstyled"></ul>
+    </div>
+  </div>
+</section>
+
+<div id="record-modal" class="modal hidden">
+  <div class="modal-content">
+    <h3 id="record-modal-title">Edit Health Notes</h3>
+    <form id="record-form">
+      <input type="hidden" id="record-pet-id" />
+
+      <div class="form-group">
+        <label for="record-vax">Vaccination Notes</label>
+        <textarea id="record-vax" rows="4" placeholder="e.g., DHPPL - 2024-03-15"></textarea>
+        <small>Update the full list of vaccinations here (one entry per line).</small>
+      </div>
+
+      <div class="form-group">
+        <label for="record-meds">Medication Notes</label>
+        <textarea id="record-meds" rows="4" placeholder="e.g., 5mg Carprofen, daily"></textarea>
+        <small>Update the full list of current/past medications here (one entry per line).</small>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="cancel-record" class="btn secondary">Cancel</button>
+        <button type="submit" class="btn primary">Save Records</button>
+      </div>
+    </form>
+  </div>
+</div>
 
     <!-- 📅 Appointments -->
 <section id="appointments" class="content-panel">
   <div class="card">
     <h2>Upcoming Appointments</h2>
     <div id="appointments-container" class="appointments-grid">
-      <!-- JS will populate appointments here dynamically -->
     </div>
   </div>
 </section>
