@@ -103,6 +103,9 @@
         <label for="appointment-date">Preferred Date</label>
         <input id="appointment-date" type="date" required />
 
+        <label for="appointment-time">Preferred Time</label>
+        <input id="appointment-time" type="time" required />
+
         <label for="appointment-reason">Reason for Visit</label>
         <textarea id="appointment-reason" required placeholder="Describe the reason for the appointment..."></textarea>
 
@@ -117,9 +120,20 @@
   <div class="card">
     <h3>Add New Reminder</h3>
     <form id="reminder-form" class="reminder-form">
+      <label for="reminder-pet">Pet Name</label>
+      <select id="reminder-pet" required>
+        </select>
+      
+      <label for="reminder-date">Reminder Date</label>
       <input id="reminder-date" type="date" required />
+      
+      <label for="reminder-time">Time (Optional)</label>
+      <input id="reminder-time" type="time" />
+      
+      <label for="reminder-text">Reminder Text</label>
       <input id="reminder-text" type="text" placeholder="e.g. Give flea medication" required />
-      <button type="submit" class="btn primary">Add</button>
+      
+      <button type="submit" class="btn primary">Set Reminder</button>
     </form>
   </div>
 
