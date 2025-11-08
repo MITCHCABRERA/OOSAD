@@ -25,7 +25,7 @@ body {
 /* SIDEBAR */
 .sidebar {
   width: 240px;
-  background: linear-gradient(180deg, #283e51, #485563);
+  background: linear-gradient(180deg, #6b5b95, #4a90e2);
   color: var(--text-light);
   display: flex;
   flex-direction: column;
@@ -38,9 +38,7 @@ body {
   text-align: center;
   font-size: 1.5rem;
   margin-bottom: 1rem;
-  background: linear-gradient(90deg, #4a90e2, #6b5b95);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-light);
 }
 
 .nav-link {
@@ -92,7 +90,7 @@ body {
 
 /* HEADER */
 .topbar {
-  background: var(--secondary);
+  background: #485563;
   color: var(--text-light);
   padding: 1rem 1.5rem;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
@@ -593,6 +591,8 @@ body {
   border-radius: 15px;
   padding: 25px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  border-left: 5px solid var(--secondary);
+  border-bottom: 5px solid var(--primary);
   text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
