@@ -187,13 +187,58 @@
     </section>
 
     <!-- ⚙️ Settings -->
-    <section id="settings" class="content-panel">
-      <div class="card">
-        <h2>Account Settings</h2>
-        <p>Feature under development.</p>
+<section id="settings" class="content-panel">
+  <div class="card account-settings">
+    <h2>⚙️ Vet Account Settings</h2>
+    <p class="subtitle">Manage your clinic profile, contact information, and login credentials</p>
+
+    <div class="settings-container">
+      <!-- Profile Photo -->
+      <div class="profile-photo">
+        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Default Vet Profile Picture" />
+        <button class="btn-upload">Change Photo</button>
       </div>
-    </section>
+
+      <!-- Vet Profile Info Form -->
+      <form class="settings-form">
+        <div class="form-group">
+          <label for="vet-name">Full Name</label>
+          <input type="text" id="vet-name" value="Dr. Alex Santos" />
+        </div>
+
+        <div class="form-group">
+          <label for="vet-email">Email Address</label>
+          <input type="email" id="vet-email" value="alexsantos@petclinic.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="vet-phone">Phone Number</label>
+          <input type="tel" id="vet-phone" value="+63 917 234 5678" />
+        </div>
+
+        <div class="form-group">
+          <label for="clinic-name">Clinic Name</label>
+          <input type="text" id="clinic-name" value="PetCare Veterinary Clinic" />
+        </div>
+
+        <div class="form-group">
+          <label for="clinic-address">Clinic Address</label>
+          <input type="text" id="clinic-address" value="123 Main Street, Quezon City" />
+        </div>
+
+        <div class="form-group">
+          <label for="vet-password">Change Password</label>
+          <input type="password" id="vet-password" placeholder="Enter new password" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-save">💾 Save Changes</button>
+          <button type="reset" class="btn-cancel">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
+</section>
 
   <script src="vet-dashboard.js"></script>
 </body>
