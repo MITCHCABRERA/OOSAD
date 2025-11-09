@@ -203,13 +203,47 @@
 </section>
 
 <section id="settings" class="content-panel">
-  <div class="card">
-      <h2>Account Settings</h2>
-      <p>Profile and notification settings coming soon!</p>
+  <div class="card account-settings">
+    <h2>⚙️ Account Settings</h2>
+    <p class="subtitle">Manage your profile, account details, and preferences</p>
+
+    <div class="settings-container">
+      <!-- Profile Photo -->
+      <div class="profile-photo">
+        <img src="https://cdn-icons-png.flaticon.com/512/847/847969.png" alt="Profile Picture" />
+        <button class="btn-upload">Change Photo</button>
+      </div>
+
+      <!-- Profile Info Form -->
+      <form class="settings-form">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input type="text" id="name" value="User" />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input type="email" id="email" value="user@example.com" />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input type="tel" id="phone" value="+63 912 345 6700" />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Change Password</label>
+          <input type="password" id="password" placeholder="Enter new password" />
+        </div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-save">💾 Save Changes</button>
+          <button type="reset" class="btn-cancel">❌ Cancel</button>
+        </div>
+      </form>
+    </div>
   </div>
 </section>
-    </main>
-  </div>
 
   <div id="pet-modal" class="modal hidden">
     <div class="modal-content">
