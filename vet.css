@@ -885,3 +885,145 @@ iframe {
 .hidden {
     display: none !important;
 }
+
+/*  Vet Account Settings */
+.account-settings {
+  padding: 2rem;
+  background: #fff;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  max-width: 900px;
+  margin: auto;
+}
+
+.account-settings h2 {
+  color: #0078d7;
+  margin-bottom: 0.5rem;
+}
+
+.account-settings .subtitle {
+  color: #666;
+  margin-bottom: 2rem;
+  font-size: 0.95rem;
+}
+
+/* Layout container */
+.settings-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+/* Profile photo section */
+.profile-photo {
+  flex: 1;
+  min-width: 220px;
+  text-align: center;
+}
+
+.profile-photo img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 3px solid #0078d7;
+  object-fit: cover;
+  background: #f5f5f5;
+  margin-bottom: 1rem;
+}
+
+.btn-upload {
+  background: #0078d7;
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+  font-weight: 600;
+}
+
+.btn-upload:hover {
+  background: #005bb5;
+}
+
+/* Form Section */
+.settings-form {
+  flex: 2;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.settings-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-form label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.4rem;
+}
+
+.settings-form input {
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s;
+  font-size: 0.95rem;
+}
+
+.settings-form input:focus {
+  border-color: #0078d7;
+}
+
+/* Buttons */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.btn-save,
+.btn-cancel {
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-save {
+  background: #0078d7;
+  color: white;
+}
+
+.btn-save:hover {
+  background: #005bb5;
+}
+
+.btn-cancel {
+  background: #f1f1f1;
+  color: #333;
+}
+
+.btn-cancel:hover {
+  background: #ddd;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .settings-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .settings-form {
+    width: 100%;
+  }
+}
